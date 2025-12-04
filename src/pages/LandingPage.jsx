@@ -7,7 +7,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const LandingPage = () => {
   const handleLogin = () => {
     const redirectUrl = `${window.location.origin}/dashboard`;
-    window.location.href = `https://econgkut.vercel.app/auth/callback`;
+    window.location.href = `${BACKEND_URL}/api/auth/google/login`;
   };
 
   return (
