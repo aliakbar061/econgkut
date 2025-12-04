@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, createContext } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import axios from "axios";
@@ -9,50 +9,24 @@ import MyBookings from "@/pages/MyBookings";
 import BookingDetail from "@/pages/BookingDetail";
 import PaymentSuccess from "@/pages/PaymentSuccess";
 import AdminDashboard from "@/pages/AdminDashboard";
+import AuthCallback from "@/pages/AuthCallback";
 import { Toaster } from "@/components/ui/sonner";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "https://backend-econgkut.vercel.app";
 const API = `${BACKEND_URL}/api`;
 
-export const AuthContext = React.createContext(null);
+export const AuthContext = createContext(null);
+
+// Configure axios defaults
+axios.defaults.withCredentials = true;
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for session_id in URL fragment
-    const hash = window.location.hash;
-    if (hash.includes('session_id=')) {
-      const sessionId = hash.split('session_id=')[1].split('&')[0];
-      handleSessionId(sessionId);
-      return;
-    }
-
-    // Check existing session
     checkSession();
   }, []);
-
-  const handleSessionId = async (sessionId) => {
-    try {
-      const response = await axios.post(`${API}/auth/session`, {
-        session_id: sessionId
-      }, {
-        withCredentials: true
-      });
-
-      setUser(response.data);
-      
-      // Clean URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-      
-      // Redirect to dashboard
-      window.location.href = '/dashboard';
-    } catch (error) {
-      console.error('Session creation error:', error);
-      setLoading(false);
-    }
-  };
 
   const checkSession = async () => {
     try {
@@ -93,6 +67,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={user ? <Navigate to="/dashboard" /> : <LandingPage />} />
+            <Route path="/auth/callback" element={<AuthCallback setUser={setUser} />} />
             <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/" />} />
             <Route path="/new-booking" element={user ? <BookingForm /> : <Navigate to="/" />} />
             <Route path="/bookings" element={user ? <MyBookings /> : <Navigate to="/" />} />
@@ -107,5 +82,4 @@ function App() {
   );
 }
 
-import React from 'react';
 export default App;

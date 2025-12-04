@@ -2,18 +2,18 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Leaf, Recycle, Truck, Award, ArrowRight, CheckCircle2 } from 'lucide-react';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "https://backend-econgkut.vercel.app";
 
 const LandingPage = () => {
   const handleLogin = () => {
-    const redirectUrl = `${window.location.origin}/dashboard`;
-    window.location.href = `https://backend-econgkut.vercel.app/auth/?redirect=${encodeURIComponent(redirectUrl)}`;
+    // Redirect directly to backend OAuth endpoint
+    window.location.href = `${BACKEND_URL}/api/auth/session`;
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-green-100">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass">
+      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/70 border-b border-green-100">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
@@ -67,7 +67,7 @@ const LandingPage = () => {
                 </Button>
               </div>
             </div>
-            <div className="relative animate-slide-up">
+            <div className="relative">
               <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl">
                 <img 
                   src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&q=80" 
@@ -93,7 +93,7 @@ const LandingPage = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 card-hover" data-testid="feature-easy-booking">
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-lg transition-shadow" data-testid="feature-easy-booking">
               <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center mb-4">
                 <Truck className="w-6 h-6 text-white" />
               </div>
@@ -103,7 +103,7 @@ const LandingPage = () => {
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 card-hover" data-testid="feature-waste-separation">
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-lg transition-shadow" data-testid="feature-waste-separation">
               <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center mb-4">
                 <Recycle className="w-6 h-6 text-white" />
               </div>
@@ -113,7 +113,7 @@ const LandingPage = () => {
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 card-hover" data-testid="feature-tracking">
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-lg transition-shadow" data-testid="feature-tracking">
               <div className="w-12 h-12 bg-green-700 rounded-xl flex items-center justify-center mb-4">
                 <CheckCircle2 className="w-6 h-6 text-white" />
               </div>
@@ -123,7 +123,7 @@ const LandingPage = () => {
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 card-hover" data-testid="feature-certified">
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-lg transition-shadow" data-testid="feature-certified">
               <div className="w-12 h-12 bg-emerald-700 rounded-xl flex items-center justify-center mb-4">
                 <Award className="w-6 h-6 text-white" />
               </div>
