@@ -7,7 +7,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const LandingPage = () => {
   const handleLogin = () => {
     const redirectUrl = `${window.location.origin}/dashboard`;
-    window.location.href = `${BACKEND_URL}/api/auth/session`;
+    window.location.href = `https://backend-econgkut.vercel.app/auth/?redirect=${encodeURIComponent(redirectUrl)}`;
   };
 
   return (
@@ -19,7 +19,7 @@ const LandingPage = () => {
             <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
               <Truck className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-green-800">Econgkut</span>
+            <span className="text-xl font-bold text-green-800">EcoCollect</span>
           </div>
           <Button 
             onClick={handleLogin}
