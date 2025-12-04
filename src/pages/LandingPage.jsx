@@ -7,7 +7,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const LandingPage = () => {
   const handleLogin = () => {
     const redirectUrl = `${window.location.origin}/dashboard`;
-    window.location.href = `${BACKEND_URL}/api/auth/google/login`;
+    window.location.href = `${BACKEND_URL}/api/auth/session`;
   };
 
   return (
