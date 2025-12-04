@@ -6,8 +6,8 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "https://backend-econgk
 
 const LandingPage = () => {
   const handleLogin = () => {
-    // Redirect directly to backend OAuth endpoint
-    window.location.href = `${BACKEND_URL}/api/auth/session`;
+    // Redirect to backend's Google OAuth endpoint
+    window.location.href = `${BACKEND_URL}/api/auth/google`;
   };
 
   return (

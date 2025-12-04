@@ -36,6 +36,7 @@ function App() {
       setUser(response.data);
     } catch (error) {
       console.log('No active session');
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -62,12 +63,12 @@ function App() {
   }
 
   return (
-    <AuthContext.Provider value={{ user, setUser, logout }}>
+    <AuthContext.Provider value={{ user, setUser, logout, checkSession }}>
       <div className="App">
         <BrowserRouter>
           <Routes>
             <Route path="/" element={user ? <Navigate to="/dashboard" /> : <LandingPage />} />
-            <Route path="/auth/callback" element={<AuthCallback setUser={setUser} />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/" />} />
             <Route path="/new-booking" element={user ? <BookingForm /> : <Navigate to="/" />} />
             <Route path="/bookings" element={user ? <MyBookings /> : <Navigate to="/" />} />
