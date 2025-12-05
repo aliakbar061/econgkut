@@ -117,7 +117,11 @@ const BookingDetail = () => {
               <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
                 <Truck className="w-6 h-6 text-white" />
               </div>
+<<<<<<< HEAD
               <span className="text-xl font-bold text-green-800">Econgkut</span>
+=======
+              <span className="text-xl font-bold text-green-800">EcoCollect</span>
+>>>>>>> 9eb26ff614e65d96303855eb5b1c5bc0a152a0fc
             </div>
           </div>
         </div>

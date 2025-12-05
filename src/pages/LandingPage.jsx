@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Leaf, Recycle, Truck, Award, ArrowRight, CheckCircle2 } from 'lucide-react';
 
+<<<<<<< HEAD
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 let tahun = new Date().getFullYear
@@ -11,18 +12,34 @@ const LandingPage = () => {
   const handleLogin = () => {
     const redirectUrl = `${window.location.origin}/dashboard`;
     window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+=======
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "https://backend-econgkut.vercel.app";
+
+const LandingPage = () => {
+  const handleLogin = () => {
+    // Redirect to backend's Google OAuth endpoint
+    window.location.href = `${BACKEND_URL}/api/auth/google`;
+>>>>>>> 9eb26ff614e65d96303855eb5b1c5bc0a152a0fc
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-green-100">
       {/* Navigation */}
+<<<<<<< HEAD
       <nav className="fixed top-0 left-0 right-0 z-50 glass">
+=======
+      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/70 border-b border-green-100">
+>>>>>>> 9eb26ff614e65d96303855eb5b1c5bc0a152a0fc
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
               <Truck className="w-6 h-6 text-white" />
             </div>
+<<<<<<< HEAD
             <span className="text-xl font-bold text-green-800">Econgkut</span>
+=======
+            <span className="text-xl font-bold text-green-800">EcoCollect</span>
+>>>>>>> 9eb26ff614e65d96303855eb5b1c5bc0a152a0fc
           </div>
           <Button 
             onClick={handleLogin}
@@ -70,7 +87,11 @@ const LandingPage = () => {
                 </Button>
               </div>
             </div>
+<<<<<<< HEAD
             <div className="relative animate-slide-up">
+=======
+            <div className="relative">
+>>>>>>> 9eb26ff614e65d96303855eb5b1c5bc0a152a0fc
               <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl">
                 <img 
                   src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&q=80" 
@@ -89,14 +110,22 @@ const LandingPage = () => {
       <section className="py-20 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
+<<<<<<< HEAD
             <h2 className="text-4xl font-bold text-green-900 mb-4">Mengapa Memilih Econgkut?</h2>
+=======
+            <h2 className="text-4xl font-bold text-green-900 mb-4">Mengapa Memilih EcoCollect?</h2>
+>>>>>>> 9eb26ff614e65d96303855eb5b1c5bc0a152a0fc
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Platform pemesanan truk sampah yang mudah, cepat, dan ramah lingkungan
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+<<<<<<< HEAD
             <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 card-hover" data-testid="feature-easy-booking">
+=======
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-lg transition-shadow" data-testid="feature-easy-booking">
+>>>>>>> 9eb26ff614e65d96303855eb5b1c5bc0a152a0fc
               <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center mb-4">
                 <Truck className="w-6 h-6 text-white" />
               </div>
@@ -106,7 +135,11 @@ const LandingPage = () => {
               </p>
             </div>
 
+<<<<<<< HEAD
             <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 card-hover" data-testid="feature-waste-separation">
+=======
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-lg transition-shadow" data-testid="feature-waste-separation">
+>>>>>>> 9eb26ff614e65d96303855eb5b1c5bc0a152a0fc
               <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center mb-4">
                 <Recycle className="w-6 h-6 text-white" />
               </div>
@@ -116,7 +149,11 @@ const LandingPage = () => {
               </p>
             </div>
 
+<<<<<<< HEAD
             <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 card-hover" data-testid="feature-tracking">
+=======
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-lg transition-shadow" data-testid="feature-tracking">
+>>>>>>> 9eb26ff614e65d96303855eb5b1c5bc0a152a0fc
               <div className="w-12 h-12 bg-green-700 rounded-xl flex items-center justify-center mb-4">
                 <CheckCircle2 className="w-6 h-6 text-white" />
               </div>
@@ -126,7 +163,11 @@ const LandingPage = () => {
               </p>
             </div>
 
+<<<<<<< HEAD
             <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 card-hover" data-testid="feature-certified">
+=======
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-lg transition-shadow" data-testid="feature-certified">
+>>>>>>> 9eb26ff614e65d96303855eb5b1c5bc0a152a0fc
               <div className="w-12 h-12 bg-emerald-700 rounded-xl flex items-center justify-center mb-4">
                 <Award className="w-6 h-6 text-white" />
               </div>
@@ -208,7 +249,11 @@ const LandingPage = () => {
       <footer className="py-8 px-6 bg-green-900 text-white">
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-sm text-green-200">
+<<<<<<< HEAD
             © {tahun} Econgkut. Semua hak dilindungi. Platform Pengelolaan Sampah Ramah Lingkungan.
+=======
+            © 2025 EcoCollect. Semua hak dilindungi. Platform Pengelolaan Sampah Ramah Lingkungan.
+>>>>>>> 9eb26ff614e65d96303855eb5b1c5bc0a152a0fc
           </p>
         </div>
       </footer>

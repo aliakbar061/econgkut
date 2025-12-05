@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { useState, useEffect } from "react";
+=======
+import { useState, useEffect, createContext } from "react";
+>>>>>>> 9eb26ff614e65d96303855eb5b1c5bc0a152a0fc
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import axios from "axios";
@@ -9,18 +13,32 @@ import MyBookings from "@/pages/MyBookings";
 import BookingDetail from "@/pages/BookingDetail";
 import PaymentSuccess from "@/pages/PaymentSuccess";
 import AdminDashboard from "@/pages/AdminDashboard";
+<<<<<<< HEAD
 import { Toaster } from "@/components/ui/sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 export const AuthContext = React.createContext(null);
+=======
+import AuthCallback from "@/pages/AuthCallback";
+import { Toaster } from "@/components/ui/sonner";
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "https://backend-econgkut.vercel.app";
+const API = `${BACKEND_URL}/api`;
+
+export const AuthContext = createContext(null);
+
+// Configure axios defaults
+axios.defaults.withCredentials = true;
+>>>>>>> 9eb26ff614e65d96303855eb5b1c5bc0a152a0fc
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+<<<<<<< HEAD
     // Check for session_id in URL fragment
     const hash = window.location.hash;
     if (hash.includes('session_id=')) {
@@ -54,6 +72,11 @@ function App() {
     }
   };
 
+=======
+    checkSession();
+  }, []);
+
+>>>>>>> 9eb26ff614e65d96303855eb5b1c5bc0a152a0fc
   const checkSession = async () => {
     try {
       const response = await axios.get(`${API}/auth/me`, {
@@ -62,6 +85,10 @@ function App() {
       setUser(response.data);
     } catch (error) {
       console.log('No active session');
+<<<<<<< HEAD
+=======
+      setUser(null);
+>>>>>>> 9eb26ff614e65d96303855eb5b1c5bc0a152a0fc
     } finally {
       setLoading(false);
     }
@@ -88,11 +115,19 @@ function App() {
   }
 
   return (
+<<<<<<< HEAD
     <AuthContext.Provider value={{ user, setUser, logout }}>
+=======
+    <AuthContext.Provider value={{ user, setUser, logout, checkSession }}>
+>>>>>>> 9eb26ff614e65d96303855eb5b1c5bc0a152a0fc
       <div className="App">
         <BrowserRouter>
           <Routes>
             <Route path="/" element={user ? <Navigate to="/dashboard" /> : <LandingPage />} />
+<<<<<<< HEAD
+=======
+            <Route path="/auth/callback" element={<AuthCallback />} />
+>>>>>>> 9eb26ff614e65d96303855eb5b1c5bc0a152a0fc
             <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/" />} />
             <Route path="/new-booking" element={user ? <BookingForm /> : <Navigate to="/" />} />
             <Route path="/bookings" element={user ? <MyBookings /> : <Navigate to="/" />} />
@@ -107,5 +142,8 @@ function App() {
   );
 }
 
+<<<<<<< HEAD
 import React from 'react';
+=======
+>>>>>>> 9eb26ff614e65d96303855eb5b1c5bc0a152a0fc
 export default App;
