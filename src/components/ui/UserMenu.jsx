@@ -1,9 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, LogOut, ChevronDown } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { User, LogOut, ChevronDown, Shield, Home } from 'lucide-react';
 
 const UserMenu = ({ user, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -16,6 +19,24 @@ const UserMenu = ({ user, onLogout }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleAdminDashboard = () => {
+    setIsOpen(false);
+    navigate('/admin');
+  };
+
+  const handleUserDashboard = () => {
+    setIsOpen(false);
+    navigate('/dashboard');
+  };
+
+  const handleLogout = () => {
+    setIsOpen(false);
+    onLogout();
+  };
+
+  // Check if currently on admin page
+  const isOnAdminPage = location.pathname === '/admin';
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -61,18 +82,48 @@ const UserMenu = ({ user, onLogout }) => {
             )}
           </div>
 
-          {/* Logout Button */}
-          <button
-            onClick={() => {
-              setIsOpen(false);
-              onLogout();
-            }}
-            className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2 transition-colors"
-            data-testid="logout-button"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Keluar</span>
-          </button>
+          {/* Menu Items */}
+          <div className="py-1">
+            {/* ✅ Admin Dashboard Menu - Only show for admin */}
+            {user?.role === 'admin' && (
+              <>
+                {isOnAdminPage ? (
+                  // Show "User Dashboard" if currently on admin page
+                  <button
+                    onClick={handleUserDashboard}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2 transition-colors"
+                    data-testid="user-dashboard-button"
+                  >
+                    <Home className="w-4 h-4" />
+                    <span>Dashboard User</span>
+                  </button>
+                ) : (
+                  // Show "Admin Dashboard" if currently on user page
+                  <button
+                    onClick={handleAdminDashboard}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2 transition-colors"
+                    data-testid="admin-dashboard-button"
+                  >
+                    <Shield className="w-4 h-4 text-green-600" />
+                    <span>Admin Dashboard</span>
+                  </button>
+                )}
+                
+                {/* Divider */}
+                <div className="my-1 border-t border-gray-100"></div>
+              </>
+            )}
+
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2 transition-colors"
+              data-testid="logout-button"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Keluar</span>
+            </button>
+          </div>
         </div>
       )}
     </div>
