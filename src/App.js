@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import axiosInstance from "@/utils/api";
+import axios from "axios";
 import LandingPage from "@/pages/LandingPage";
 import Dashboard from "@/pages/Dashboard";
 import BookingForm from "@/pages/BookingForm";
@@ -11,49 +11,57 @@ import PaymentSuccess from "@/pages/PaymentSuccess";
 import AdminDashboard from "@/pages/AdminDashboard";
 import { Toaster } from "@/components/ui/sonner";
 
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
 export const AuthContext = React.createContext(null);
-
-// Create axios instance with interceptor for Authorization header
-const axiosInstance = axios.create({
-  baseURL: API,
-  withCredentials: true
-});
-
-// Add Authorization header to all requests
-axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('session_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check for session_id in URL fragment
+    const hash = window.location.hash;
+    if (hash.includes('session_id=')) {
+      const sessionId = hash.split('session_id=')[1].split('&')[0];
+      handleSessionId(sessionId);
+      return;
+    }
+
+    // Check existing session
     checkSession();
   }, []);
 
+  const handleSessionId = async (sessionId) => {
+    try {
+      const response = await axios.post(`${API}/auth/session`, {
+        session_id: sessionId
+      }, {
+        withCredentials: true
+      });
+
+      setUser(response.data);
+      
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // Redirect to dashboard
+      window.location.href = '/dashboard';
+    } catch (error) {
+      console.error('Session creation error:', error);
+      setLoading(false);
+    }
+  };
+
   const checkSession = async () => {
     try {
-      const token = localStorage.getItem('session_token');
-      
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      const response = await axiosInstance.get('/auth/me');
+      const response = await axios.get(`${API}/auth/me`, {
+        withCredentials: true
+      });
       setUser(response.data);
     } catch (error) {
       console.log('No active session');
-      // Clear invalid token
-      localStorage.removeItem('session_token');
-      localStorage.removeItem('user');
     } finally {
       setLoading(false);
     }
@@ -61,15 +69,13 @@ function App() {
 
   const logout = async () => {
     try {
-      await axiosInstance.post('/auth/logout');
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      // Clear local storage
-      localStorage.removeItem('session_token');
-      localStorage.removeItem('user');
+      await axios.post(`${API}/auth/logout`, {}, {
+        withCredentials: true
+      });
       setUser(null);
       window.location.href = '/';
+    } catch (error) {
+      console.error('Logout error:', error);
     }
   };
 
@@ -82,7 +88,7 @@ function App() {
   }
 
   return (
-    <AuthContext.Provider value={{ user, setUser, logout, axiosInstance }}>
+    <AuthContext.Provider value={{ user, setUser, logout }}>
       <div className="App">
         <BrowserRouter>
           <Routes>
@@ -101,4 +107,5 @@ function App() {
   );
 }
 
+import React from 'react';
 export default App;
