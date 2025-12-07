@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from '@/App';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Truck, MapPin, Calendar, Clock, Weight, Package, CreditCard, CheckCircle2, Wallet } from 'lucide-react';
+import { ArrowLeft, Truck, MapPin, Calendar, Clock, Weight, Package, CreditCard, CheckCircle2, Wallet, AlertTriangle, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BookingDetail = () => {
@@ -12,6 +12,7 @@ const BookingDetail = () => {
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -42,7 +43,6 @@ const BookingDetail = () => {
     }
   };
 
-  // ✅ Fungsi format Rupiah
   const formatRupiah = (amount) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -52,19 +52,14 @@ const BookingDetail = () => {
     }).format(amount);
   };
 
-  // ✅ Fungsi untuk hapus booking
   const handleDeleteBooking = async () => {
-    // Konfirmasi sebelum hapus
-    if (!window.confirm('Apakah Anda yakin ingin menghapus pemesanan ini? Tindakan ini tidak dapat dibatalkan.')) {
-      return;
-    }
-
     setDeleteLoading(true);
+    setShowDeleteDialog(false);
+    
     try {
       await axiosInstance.delete(`/bookings/${booking.id}`);
       toast.success('Pemesanan berhasil dihapus');
       
-      // Redirect ke halaman bookings
       setTimeout(() => {
         navigate('/bookings');
       }, 1000);
@@ -115,10 +110,9 @@ const BookingDetail = () => {
     }
   };
 
-  // ✅ LOGIKA: Otomatis tampilkan "Sudah Dibayar" jika status completed
   const displayPaymentStatus = () => {
     if (booking.status === 'completed') {
-      return 'paid'; // ✅ Force payment status menjadi paid jika completed
+      return 'paid';
     }
     return booking.payment_status;
   };
@@ -148,6 +142,58 @@ const BookingDetail = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-green-100">
+      {/* Delete Confirmation Dialog */}
+      {showDeleteDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scale-in">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Konfirmasi Hapus</h3>
+              </div>
+              <button
+                onClick={() => setShowDeleteDialog(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="mb-6">
+              <p className="text-gray-700 mb-3">
+                Apakah Anda yakin ingin menghapus pemesanan ini?
+              </p>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-800 font-medium">
+                  ⚠️ Tindakan ini tidak dapat dibatalkan
+                </p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex space-x-3">
+              <Button
+                onClick={() => setShowDeleteDialog(false)}
+                variant="outline"
+                className="flex-1 border-gray-300 hover:bg-gray-50"
+              >
+                Batal
+              </Button>
+              <Button
+                onClick={handleDeleteBooking}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+              >
+                Ya, Hapus
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Navigation */}
       <nav className="bg-white border-b border-green-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4">
@@ -268,7 +314,7 @@ const BookingDetail = () => {
               </div>
             </div>
 
-            {/* ✅ Payment Status - Otomatis "Sudah Dibayar" jika completed */}
+            {/* Payment Status */}
             <div className="flex items-center justify-between mb-4">
               <span className="text-lg font-semibold text-gray-800">Status Pembayaran:</span>
               <span className={`px-4 py-2 rounded-full text-sm font-medium ${
@@ -313,11 +359,11 @@ const BookingDetail = () => {
               </div>
             )}
 
-            {/* ✅ Tombol Hapus - Hanya untuk status pending atau cancelled */}
+            {/* Tombol Hapus - Hanya untuk status pending atau cancelled */}
             {(booking.status === 'pending' || booking.status === 'cancelled') && (
               <div className="mt-6">
                 <Button
-                  onClick={handleDeleteBooking}
+                  onClick={() => setShowDeleteDialog(true)}
                   disabled={deleteLoading}
                   variant="destructive"
                   className="w-full bg-red-600 hover:bg-red-700 text-white"
@@ -395,6 +441,36 @@ const BookingDetail = () => {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes scale-in {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        .animate-fade-in {
+          animation: fade-in 0.2s ease-out;
+        }
+
+        .animate-scale-in {
+          animation: scale-in 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 };
