@@ -9,10 +9,40 @@ const LandingPage = () => {
   const { setUser, axiosInstance } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  // ✅ STEP 1: Handle redirect callback dari Google (DEFINISI FUNGSI)
+  const handleRedirectCallback = async () => {
+    // Google mengembalikan id_token di URL fragment (#id_token=...)
+    const hash = window.location.hash;
+    
+    if (hash.includes('id_token=')) {
+      const params = new URLSearchParams(hash.substring(1)); // Hapus # di awal
+      const idToken = params.get('id_token');
+      
+      if (idToken) {
+        console.log('✅ ID Token ditemukan dari redirect Google');
+        await processGoogleCredential(idToken);
+        // Clean up URL agar token tidak terlihat di address bar
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+    
+    // Alternatif: cek di query string juga
+    const queryParams = new URLSearchParams(window.location.search);
+    const credential = queryParams.get('credential');
+    
+    if (credential) {
+      console.log('✅ Credential ditemukan dari query string');
+      await processGoogleCredential(credential);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  };
+
+  // ✅ STEP 2: useEffect - Jalan otomatis saat component load
   useEffect(() => {
-    // Check if redirected back from Google with credential
+    // Cek apakah ini redirect dari Google (ada credential di URL)
     handleRedirectCallback();
 
+    // Load Google Sign-In script
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
     script.async = true;
@@ -26,19 +56,6 @@ const LandingPage = () => {
       }
     };
   }, []);
-
-  // ✅ Handle redirect callback dari Google
-  const handleRedirectCallback = async () => {
-    // Google akan menambahkan credential ke URL hash setelah redirect
-    const params = new URLSearchParams(window.location.search);
-    const credential = params.get('credential');
-    
-    if (credential) {
-      await processGoogleCredential(credential);
-      // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  };
 
   const initializeGoogleSignIn = () => {
     if (!window.google) return;
@@ -111,19 +128,37 @@ const LandingPage = () => {
     await processGoogleCredential(response.credential);
   };
 
-  // ✅ Trigger Google Sign-In redirect
+  // ✅ Trigger Google Sign-In redirect (FIXED)
   const handleLogin = () => {
     if (!window.google) {
       toast.warning('Google Sign-In sedang dimuat, silakan coba lagi');
       return;
     }
 
-    // Redirect ke Google Login page
-    window.google.accounts.id.prompt((notification) => {
-      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-        console.log('Google prompt not displayed, triggering manual redirect');
-      }
-    });
+    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+    
+    if (!clientId) {
+      toast.error('Client ID tidak ditemukan');
+      return;
+    }
+
+    // ✅ Build Google OAuth URL manually untuk redirect
+    const redirectUri = encodeURIComponent(window.location.origin);
+    const scope = encodeURIComponent('openid email profile');
+    const responseType = 'id_token';
+    const nonce = Math.random().toString(36).substring(2, 15);
+    
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+      `client_id=${clientId}&` +
+      `redirect_uri=${redirectUri}&` +
+      `response_type=${responseType}&` +
+      `scope=${scope}&` +
+      `nonce=${nonce}`;
+    
+    console.log('🚀 Redirecting to Google Login...');
+    
+    // ✅ Redirect ke halaman Google
+    window.location.href = googleAuthUrl;
   };
 
   return (
