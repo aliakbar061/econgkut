@@ -214,6 +214,7 @@ const LandingPage = () => {
                   size="lg"
                   className="border-2 border-green-600 text-green-700 hover:bg-green-50 rounded-full px-8 text-base"
                   data-testid="hero-learn-more-button"
+                  href="#lanjut"
                 >
                   Pelajari Lebih Lanjut
                 </Button>
@@ -291,7 +292,7 @@ const LandingPage = () => {
       {/* How It Works Section */}
       <section className="py-20 px-6 bg-gradient-to-br from-green-600 to-emerald-700 text-white">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" id="lanjut">
             <h2 className="text-4xl font-bold mb-4">Cara Kerja</h2>
             <p className="text-lg text-green-100 max-w-2xl mx-auto">
               Proses pemesanan yang sederhana dan cepat
