@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '@/App'; // ✅ Import context
+import { AuthContext } from '@/App';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,7 +10,7 @@ import { ArrowLeft, Truck, Calendar, MapPin, Weight } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BookingForm = () => {
-  const { user, logout, axiosInstance } = useContext(AuthContext); // ✅ Ambil axiosInstance dari context
+  const { user, logout, axiosInstance } = useContext(AuthContext);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [wasteTypes, setWasteTypes] = useState([]);
@@ -24,7 +24,6 @@ const BookingForm = () => {
   });
 
   useEffect(() => {
-    // Check if user is logged in
     if (!user) {
       toast.error('Silakan login terlebih dahulu');
       navigate('/');
@@ -36,7 +35,7 @@ const BookingForm = () => {
 
   const fetchWasteTypes = async () => {
     try {
-      const response = await axiosInstance.get('/waste-types'); // ✅ Gunakan axiosInstance
+      const response = await axiosInstance.get('/waste-types');
       setWasteTypes(response.data);
     } catch (error) {
       console.error('Fetch waste types error:', error);
@@ -55,13 +54,12 @@ const BookingForm = () => {
 
     setLoading(true);
     try {
-      const response = await axiosInstance.post('/bookings', formData); // ✅ Gunakan axiosInstance
+      const response = await axiosInstance.post('/bookings', formData);
       toast.success('Pemesanan berhasil dibuat!');
       navigate(`/bookings/${response.data.id}`);
     } catch (error) {
       console.error('Booking error:', error);
       
-      // Error 401 sudah di-handle oleh interceptor
       if (error.response?.status !== 401) {
         toast.error(error.response?.data?.detail || 'Gagal membuat pemesanan');
       }
@@ -70,7 +68,7 @@ const BookingForm = () => {
     }
   };
 
-    // ✅ Fungsi format Rupiah
+  // ✅ Fungsi format Rupiah
   const formatRupiah = (amount) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -81,10 +79,11 @@ const BookingForm = () => {
   };
 
   const selectedWasteType = wasteTypes.find(w => w.id === formData.waste_type_id);
+  
+  // ✅ FIX: Hitung estimated price sebagai number, bukan string
   const estimatedPrice = selectedWasteType && formData.estimated_weight 
-    ? (selectedWasteType.price_per_kg * parseFloat(formData.estimated_weight)).toFixed(2)
-    : '0.00';
-    
+    ? selectedWasteType.price_per_kg * parseFloat(formData.estimated_weight)
+    : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-green-100">
@@ -164,7 +163,7 @@ const BookingForm = () => {
             </Select>
             {selectedWasteType && (
               <p className="text-sm text-gray-600">
-                Harga: ${selectedWasteType.price_per_kg} per kg
+                Harga: {formatRupiah(selectedWasteType.price_per_kg)} per kg
                 {selectedWasteType.recyclable && ' • Dapat didaur ulang'}
               </p>
             )}
@@ -241,15 +240,13 @@ const BookingForm = () => {
             />
           </div>
 
-
-
           {/* Price Estimate */}
-          
-          {estimatedPrice !== '0.00' && (
+          {estimatedPrice > 0 && (
             <div className="p-4 bg-green-50 border border-green-200 rounded-xl" data-testid="price-estimate">
               <div className="flex justify-between items-center">
                 <span className="text-green-900 font-medium">Estimasi Biaya:</span>
-                <span className="text-2xl font-bold text-green-600">Rp. {formatRupiah.amount}</span>
+                {/* ✅ FIX: Panggil formatRupiah dengan benar */}
+                <span className="text-2xl font-bold text-green-600">{formatRupiah(estimatedPrice)}</span>
               </div>
               <p className="text-sm text-gray-600 mt-2">Biaya final akan dikonfirmasi setelah penimbangan aktual</p>
             </div>
