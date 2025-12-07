@@ -1,16 +1,12 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
 import { AuthContext } from '@/App';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Truck, MapPin, Calendar, Clock, Weight, Package, CreditCard, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
 const BookingDetail = () => {
-  const { user } = useContext(AuthContext);
+  const { user, axiosInstance } = useContext(AuthContext); // ✅ Ambil axiosInstance dari context
   const navigate = useNavigate();
   const { id } = useParams();
   const [booking, setBooking] = useState(null);
@@ -18,15 +14,31 @@ const BookingDetail = () => {
   const [paymentLoading, setPaymentLoading] = useState(false);
 
   useEffect(() => {
+    // ✅ Check auth first
+    if (!user) {
+      toast.error('Silakan login terlebih dahulu');
+      navigate('/');
+      return;
+    }
+    
     fetchBooking();
-  }, [id]);
+  }, [id, user, navigate]);
 
   const fetchBooking = async () => {
     try {
-      const response = await axios.get(`${API}/bookings/${id}`, { withCredentials: true });
+      const response = await axiosInstance.get(`/bookings/${id}`); // ✅ Gunakan axiosInstance
       setBooking(response.data);
     } catch (error) {
-      toast.error('Gagal memuat detail pemesanan');
+      console.error('Fetch booking error:', error);
+      
+      // ✅ Handle different error cases
+      if (error.response?.status === 404) {
+        toast.error('Pemesanan tidak ditemukan');
+      } else if (error.response?.status !== 401) {
+        // 401 sudah di-handle oleh interceptor
+        toast.error('Gagal memuat detail pemesanan');
+      }
+      
       navigate('/bookings');
     } finally {
       setLoading(false);
@@ -36,19 +48,18 @@ const BookingDetail = () => {
   const handlePayment = async () => {
     setPaymentLoading(true);
     try {
-      const response = await axios.post(
-        `${API}/payments/checkout`,
-        {
-          booking_id: booking.id,
-          origin_url: window.location.origin
-        },
-        { withCredentials: true }
-      );
+      const response = await axiosInstance.post('/payments/checkout', { // ✅ Gunakan axiosInstance
+        booking_id: booking.id,
+        origin_url: window.location.origin
+      });
       
       // Redirect to Stripe checkout
       window.location.href = response.data.url;
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Gagal membuat sesi pembayaran');
+      console.error('Payment error:', error);
+      if (error.response?.status !== 401) {
+        toast.error(error.response?.data?.detail || 'Gagal membuat sesi pembayaran');
+      }
       setPaymentLoading(false);
     }
   };
@@ -88,10 +99,25 @@ const BookingDetail = () => {
     }
   };
 
+  // ✅ Show loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 flex items-center justify-center">
         <div className="text-green-600 text-xl font-semibold">Memuat...</div>
+      </div>
+    );
+  }
+
+  // ✅ Handle case when booking is null after loading
+  if (!booking) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl text-gray-700 mb-4">Pemesanan tidak ditemukan</p>
+          <Button onClick={() => navigate('/bookings')} className="bg-green-600 hover:bg-green-700">
+            Kembali ke Riwayat
+          </Button>
+        </div>
       </div>
     );
   }
