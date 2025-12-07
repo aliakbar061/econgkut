@@ -68,6 +68,8 @@ const Dashboard = () => {
               <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
                 <Truck className="w-6 h-6 text-white" />
               </div>
+            </div>
+            <div className="flex items-center space-x-4">
               <UserMenu user={user} onLogout={logout} />
             </div>
           </div>
