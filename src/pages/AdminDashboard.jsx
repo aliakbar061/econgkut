@@ -8,14 +8,13 @@ import { toast } from 'sonner';
 import UserMenu from '@/components/ui/UserMenu';
 
 const AdminDashboard = () => {
-  const { user, logout, axiosInstance } = useContext(AuthContext); // ✅ Tambahkan axiosInstance
+  const { user, logout, axiosInstance } = useContext(AuthContext);
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // ✅ Check if user is admin
     if (!user) {
       navigate('/');
       return;
@@ -33,7 +32,7 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await axiosInstance.get('/admin/stats'); // ✅ Gunakan axiosInstance
+      const response = await axiosInstance.get('/admin/stats');
       setStats(response.data);
     } catch (error) {
       console.error('Fetch stats error:', error);
@@ -45,7 +44,7 @@ const AdminDashboard = () => {
 
   const fetchAllBookings = async () => {
     try {
-      const response = await axiosInstance.get('/admin/bookings'); // ✅ Gunakan axiosInstance
+      const response = await axiosInstance.get('/admin/bookings');
       setBookings(response.data);
     } catch (error) {
       console.error('Fetch bookings error:', error);
@@ -59,11 +58,12 @@ const AdminDashboard = () => {
 
   const updateBookingStatus = async (bookingId, newStatus) => {
     try {
-      await axiosInstance.patch( // ✅ Gunakan axiosInstance
+      await axiosInstance.patch(
         `/admin/bookings/${bookingId}`,
         { status: newStatus }
       );
       toast.success('Status berhasil diupdate');
+      // ✅ Refresh data setelah update
       fetchAllBookings();
       fetchStats();
     } catch (error) {
@@ -72,6 +72,27 @@ const AdminDashboard = () => {
         toast.error('Gagal mengupdate status');
       }
     }
+  };
+
+  // ✅ Fungsi format Rupiah
+  const formatRupiah = (amount) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  // ✅ LOGIKA: Display payment status berdasarkan booking status
+  const getPaymentStatus = (booking) => {
+    if (booking.status === 'completed') {
+      return { text: '✓ Dibayar', color: 'text-green-600' };
+    }
+    return { 
+      text: booking.payment_status === 'paid' ? '✓ Dibayar' : 'Belum Dibayar', 
+      color: booking.payment_status === 'paid' ? 'text-green-600' : 'text-orange-600' 
+    };
   };
 
   const getStatusColor = (status) => {
@@ -109,7 +130,6 @@ const AdminDashboard = () => {
               <span className="text-xl font-bold text-green-800">ECOngkut Admin</span>
             </div>
             
-            {/* ✅ User Menu with logout */}
             <UserMenu user={user} onLogout={logout} />
           </div>
         </div>
@@ -145,12 +165,13 @@ const AdminDashboard = () => {
               <p className="text-gray-600 font-medium">Menunggu Konfirmasi</p>
             </div>
 
+            {/* ✅ Format Rupiah untuk Total Pendapatan */}
             <div className="p-6 bg-white rounded-2xl shadow-lg border border-green-100">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                   <DollarSign className="w-6 h-6 text-green-600" />
                 </div>
-                <span className="text-3xl font-bold text-green-600">Rp {stats.total_revenue.toLocaleString('id-ID')}</span>
+                <span className="text-2xl font-bold text-green-600">{formatRupiah(stats.total_revenue)}</span>
               </div>
               <p className="text-gray-600 font-medium">Total Pendapatan</p>
             </div>
@@ -192,58 +213,64 @@ const AdminDashboard = () => {
             </div>
           ) : (
             <div className="space-y-4" data-testid="admin-bookings-list">
-              {bookings.map((booking) => (
-                <div
-                  key={booking.id}
-                  className="p-6 border border-gray-200 rounded-xl hover:border-green-300 hover:shadow-md transition-all"
-                  data-testid={`admin-booking-item-${booking.id}`}
-                >
-                  <div className="grid md:grid-cols-4 gap-4 items-center">
-                    <div>
-                      <h3 className="font-semibold text-lg text-green-900">{booking.waste_type_name}</h3>
-                      <p className="text-sm text-gray-600">{booking.user_email}</p>
-                      <p className="text-xs text-gray-500 mt-1">{booking.pickup_address}</p>
-                    </div>
+              {bookings.map((booking) => {
+                const paymentStatus = getPaymentStatus(booking);
+                
+                return (
+                  <div
+                    key={booking.id}
+                    className="p-6 border border-gray-200 rounded-xl hover:border-green-300 hover:shadow-md transition-all"
+                    data-testid={`admin-booking-item-${booking.id}`}
+                  >
+                    <div className="grid md:grid-cols-4 gap-4 items-center">
+                      <div>
+                        <h3 className="font-semibold text-lg text-green-900">{booking.waste_type_name}</h3>
+                        <p className="text-sm text-gray-600">{booking.user_email}</p>
+                        <p className="text-xs text-gray-500 mt-1">{booking.pickup_address}</p>
+                      </div>
 
-                    <div>
-                      <p className="text-sm text-gray-600">Jadwal</p>
-                      <p className="font-medium text-gray-900">{booking.pickup_date}</p>
-                      <p className="text-sm text-gray-600">{booking.pickup_time}</p>
-                    </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Jadwal</p>
+                        <p className="font-medium text-gray-900">{booking.pickup_date}</p>
+                        <p className="text-sm text-gray-600">{booking.pickup_time}</p>
+                      </div>
 
-                    <div>
-                      <p className="text-sm text-gray-600">Berat & Harga</p>
-                      <p className="font-medium text-gray-900">{booking.estimated_weight} kg</p>
-                      <p className="text-lg font-bold text-green-600">Rp {booking.estimated_price.toLocaleString('id-ID')}</p>
-                      <p className={`text-xs mt-1 ${booking.payment_status === 'paid' ? 'text-green-600' : 'text-orange-600'}`}>
-                        {booking.payment_status === 'paid' ? 'Dibayar' : 'Belum Dibayar'}
-                      </p>
-                    </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Berat & Harga</p>
+                        <p className="font-medium text-gray-900">{booking.estimated_weight} kg</p>
+                        {/* ✅ Format Rupiah untuk harga */}
+                        <p className="text-lg font-bold text-green-600">{formatRupiah(booking.estimated_price)}</p>
+                        {/* ✅ Payment status yang otomatis update */}
+                        <p className={`text-xs mt-1 font-medium ${paymentStatus.color}`}>
+                          {paymentStatus.text}
+                        </p>
+                      </div>
 
-                    <div>
-                      <p className="text-sm text-gray-600 mb-2">Update Status</p>
-                      <Select
-                        value={booking.status}
-                        onValueChange={(value) => updateBookingStatus(booking.id, value)}
-                      >
-                        <SelectTrigger 
-                          className={`${getStatusColor(booking.status)} border-0 font-medium`}
-                          data-testid={`status-select-${booking.id}`}
+                      <div>
+                        <p className="text-sm text-gray-600 mb-2">Update Status</p>
+                        <Select
+                          value={booking.status}
+                          onValueChange={(value) => updateBookingStatus(booking.id, value)}
                         >
-                          <SelectValue>{getStatusText(booking.status)}</SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pending">Menunggu</SelectItem>
-                          <SelectItem value="confirmed">Dikonfirmasi</SelectItem>
-                          <SelectItem value="in-transit">Dalam Perjalanan</SelectItem>
-                          <SelectItem value="completed">Selesai</SelectItem>
-                          <SelectItem value="cancelled">Dibatalkan</SelectItem>
-                        </SelectContent>
-                      </Select>
+                          <SelectTrigger 
+                            className={`${getStatusColor(booking.status)} border-0 font-medium`}
+                            data-testid={`status-select-${booking.id}`}
+                          >
+                            <SelectValue>{getStatusText(booking.status)}</SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pending">Menunggu</SelectItem>
+                            <SelectItem value="confirmed">Dikonfirmasi</SelectItem>
+                            <SelectItem value="in-transit">Dalam Perjalanan</SelectItem>
+                            <SelectItem value="completed">Selesai</SelectItem>
+                            <SelectItem value="cancelled">Dibatalkan</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
