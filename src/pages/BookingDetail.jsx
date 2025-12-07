@@ -11,6 +11,7 @@ const BookingDetail = () => {
   const { id } = useParams();
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -49,6 +50,34 @@ const BookingDetail = () => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
+  };
+
+  // ✅ Fungsi untuk hapus booking
+  const handleDeleteBooking = async () => {
+    // Konfirmasi sebelum hapus
+    if (!window.confirm('Apakah Anda yakin ingin menghapus pemesanan ini? Tindakan ini tidak dapat dibatalkan.')) {
+      return;
+    }
+
+    setDeleteLoading(true);
+    try {
+      await axiosInstance.delete(`/bookings/${booking.id}`);
+      toast.success('Pemesanan berhasil dihapus');
+      
+      // Redirect ke halaman bookings
+      setTimeout(() => {
+        navigate('/bookings');
+      }, 1000);
+    } catch (error) {
+      console.error('Delete booking error:', error);
+      if (error.response?.status === 400) {
+        toast.error(error.response?.data?.detail || 'Hanya pemesanan dengan status "Menunggu" atau "Dibatalkan" yang dapat dihapus');
+      } else if (error.response?.status !== 401) {
+        toast.error('Gagal menghapus pemesanan');
+      }
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   const getStatusColor = (status) => {
@@ -280,6 +309,24 @@ const BookingDetail = () => {
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
                 <p className="text-green-800 font-medium">
                   🎉 Sampah telah diambil dan pembayaran selesai. Terima kasih!
+                </p>
+              </div>
+            )}
+
+            {/* ✅ Tombol Hapus - Hanya untuk status pending atau cancelled */}
+            {(booking.status === 'pending' || booking.status === 'cancelled') && (
+              <div className="mt-6">
+                <Button
+                  onClick={handleDeleteBooking}
+                  disabled={deleteLoading}
+                  variant="destructive"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white"
+                  data-testid="delete-booking-button"
+                >
+                  {deleteLoading ? 'Menghapus...' : '🗑️ Hapus Pemesanan'}
+                </Button>
+                <p className="text-xs text-gray-500 text-center mt-2">
+                  Pemesanan yang sudah dikonfirmasi tidak dapat dihapus
                 </p>
               </div>
             )}
