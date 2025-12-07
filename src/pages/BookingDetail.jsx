@@ -115,7 +115,7 @@ const BookingDetail = () => {
         <div className="text-center">
           <p className="text-xl text-gray-700 mb-4">Pemesanan tidak ditemukan</p>
           <Button onClick={() => navigate('/bookings')} className="bg-green-600 hover:bg-green-700">
-            Kembali ke Riwayat
+            Kembali
           </Button>
         </div>
       </div>
