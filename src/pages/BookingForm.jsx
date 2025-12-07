@@ -1,7 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { AuthContext } from '@/App';
+import { AuthContext } from '@/App'; // ✅ Import context
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,11 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, Truck, Calendar, MapPin, Weight } from 'lucide-react';
 import { toast } from 'sonner';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
 const BookingForm = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, axiosInstance } = useContext(AuthContext); // ✅ Ambil axiosInstance dari context
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [wasteTypes, setWasteTypes] = useState([]);
@@ -28,14 +24,22 @@ const BookingForm = () => {
   });
 
   useEffect(() => {
+    // Check if user is logged in
+    if (!user) {
+      toast.error('Silakan login terlebih dahulu');
+      navigate('/');
+      return;
+    }
+    
     fetchWasteTypes();
-  }, []);
+  }, [user, navigate]);
 
   const fetchWasteTypes = async () => {
     try {
-      const response = await axios.get(`${API}/waste-types`, { withCredentials: true });
+      const response = await axiosInstance.get('/waste-types'); // ✅ Gunakan axiosInstance
       setWasteTypes(response.data);
     } catch (error) {
+      console.error('Fetch waste types error:', error);
       toast.error('Gagal memuat jenis sampah');
     }
   };
@@ -43,18 +47,24 @@ const BookingForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.waste_type_id || !formData.estimated_weight || !formData.pickup_date || !formData.pickup_time || !formData.pickup_address) {
+    if (!formData.waste_type_id || !formData.estimated_weight || 
+        !formData.pickup_date || !formData.pickup_time || !formData.pickup_address) {
       toast.error('Mohon lengkapi semua field yang diperlukan');
       return;
     }
 
     setLoading(true);
     try {
-      const response = await axios.post(`${API}/bookings`, formData, { withCredentials: true });
+      const response = await axiosInstance.post('/bookings', formData); // ✅ Gunakan axiosInstance
       toast.success('Pemesanan berhasil dibuat!');
       navigate(`/bookings/${response.data.id}`);
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Gagal membuat pemesanan');
+      console.error('Booking error:', error);
+      
+      // Error 401 sudah di-handle oleh interceptor
+      if (error.response?.status !== 401) {
+        toast.error(error.response?.data?.detail || 'Gagal membuat pemesanan');
+      }
     } finally {
       setLoading(false);
     }
