@@ -249,7 +249,7 @@ const BookingForm = () => {
             <div className="p-4 bg-green-50 border border-green-200 rounded-xl" data-testid="price-estimate">
               <div className="flex justify-between items-center">
                 <span className="text-green-900 font-medium">Estimasi Biaya:</span>
-                <span className="text-2xl font-bold text-green-600">Rp. {formatRupiah}</span>
+                <span className="text-2xl font-bold text-green-600">Rp. {formatRupiah.amount}</span>
               </div>
               <p className="text-sm text-gray-600 mt-2">Biaya final akan dikonfirmasi setelah penimbangan aktual</p>
             </div>
