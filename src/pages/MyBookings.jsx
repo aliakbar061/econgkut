@@ -186,7 +186,7 @@ const MyBookings = () => {
                     </div>
                     <div className="flex items-center space-x-4">
                       <div className="text-right">
-                        <p className="text-2xl font-bold text-green-600">${booking.estimated_price.toFixed(2)}</p>
+                        <p className="text-2xl font-bold text-green-600">Rp. {booking.estimated_price.toFixed(2)}</p>
                       </div>
                       <ChevronRight className="w-6 h-6 text-gray-400" />
                     </div>

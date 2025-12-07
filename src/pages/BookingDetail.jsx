@@ -215,7 +215,7 @@ const BookingDetail = () => {
                 <CreditCard className="w-6 h-6 text-green-600 mt-1" />
                 <div className="flex-1">
                   <p className="text-sm text-gray-600 mb-1">Estimasi Biaya</p>
-                  <p className="text-2xl font-bold text-green-600">${booking.estimated_price.toFixed(2)}</p>
+                  <p className="text-2xl font-bold text-green-600">Rp. {booking.estimated_price.toFixed(2)}</p>
                 </div>
               </div>
             </div>
