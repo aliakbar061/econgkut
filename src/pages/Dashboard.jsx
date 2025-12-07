@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Truck, Plus, History, LogOut, Calendar, Package, User, LayoutDashboard } from 'lucide-react';
 
 const Dashboard = () => {
-  const { user, logout, axiosInstance } = useContext(AuthContext);
+  const { user, logout, axiosInstance } = useContext(AuthContext); // ← Tambahkan axiosInstance
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +18,7 @@ const Dashboard = () => {
 
   const seedData = async () => {
     try {
-      await axiosInstance.post('/seed-data');
+      await axiosInstance.post('/seed-data'); // ← Ganti axios dengan axiosInstance
       console.log('✅ Seed data called');
     } catch (error) {
       console.log('Seed data error:', error);
@@ -27,7 +27,7 @@ const Dashboard = () => {
 
   const fetchRecentBookings = async () => {
     try {
-      const response = await axiosInstance.get('/bookings');
+      const response = await axiosInstance.get('/bookings'); // ← Ganti axios dengan axiosInstance
       setBookings(response.data.slice(0, 5));
     } catch (error) {
       console.error('Error fetching bookings:', error);
@@ -36,7 +36,7 @@ const Dashboard = () => {
     }
   };
 
-  // ✅ Fungsi format Rupiah
+ // ✅ Fungsi format Rupiah
   const formatRupiah = (amount) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -45,6 +45,7 @@ const Dashboard = () => {
       maximumFractionDigits: 0
     }).format(amount);
   };
+
 
   const getStatusColor = (status) => {
     const colors = {
@@ -181,7 +182,6 @@ const Dashboard = () => {
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm text-gray-500">
-                    {/* ✅ Format Rupiah dengan pemisah ribuan */}
                     <span className="font-semibold text-green-600">{formatRupiah(booking.estimated_price)}</span>
                   </div>
                 </div>
