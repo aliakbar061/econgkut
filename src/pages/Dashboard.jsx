@@ -1,28 +1,24 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { AuthContext } from '@/App';
 import { Button } from '@/components/ui/button';
 import { Truck, Plus, History, LogOut, Calendar, Package, User, LayoutDashboard } from 'lucide-react';
-import { toast } from 'sonner';
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
 
 const Dashboard = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, axiosInstance } = useContext(AuthContext); // ← Tambahkan axiosInstance
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchRecentBookings();
     seedData();
+    fetchRecentBookings();
   }, []);
 
   const seedData = async () => {
     try {
-      await axios.post(`${API}/seed-data`, {}, { withCredentials: true });
+      await axiosInstance.post('/seed-data'); // ← Ganti axios dengan axiosInstance
+      console.log('✅ Seed data called');
     } catch (error) {
       console.log('Seed data error:', error);
     }
@@ -30,8 +26,8 @@ const Dashboard = () => {
 
   const fetchRecentBookings = async () => {
     try {
-      const response = await axios.get(`${API}/bookings`, { withCredentials: true });
-      setBookings(response.data.slice(0, 5)); // Get last 5 bookings
+      const response = await axiosInstance.get('/bookings'); // ← Ganti axios dengan axiosInstance
+      setBookings(response.data.slice(0, 5));
     } catch (error) {
       console.error('Error fetching bookings:', error);
     } finally {

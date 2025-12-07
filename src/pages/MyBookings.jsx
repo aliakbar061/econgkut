@@ -1,17 +1,13 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { AuthContext } from '@/App';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Truck, Search, Package, ChevronRight } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
 const MyBookings = () => {
-  const { user } = useContext(AuthContext);
+  const { user, axiosInstance } = useContext(AuthContext); // ← Tambahkan axiosInstance
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [filteredBookings, setFilteredBookings] = useState([]);
@@ -29,7 +25,7 @@ const MyBookings = () => {
 
   const fetchBookings = async () => {
     try {
-      const response = await axios.get(`${API}/bookings`, { withCredentials: true });
+      const response = await axiosInstance.get('/bookings'); // ← Ganti axios dengan axiosInstance
       setBookings(response.data);
       setFilteredBookings(response.data);
     } catch (error) {
@@ -42,12 +38,10 @@ const MyBookings = () => {
   const filterBookings = () => {
     let filtered = bookings;
 
-    // Filter by status
     if (statusFilter !== 'all') {
       filtered = filtered.filter(b => b.status === statusFilter);
     }
 
-    // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(b => 
         b.waste_type_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
