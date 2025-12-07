@@ -1,19 +1,141 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Leaf, Recycle, Truck, Award, ArrowRight, CheckCircle2 } from 'lucide-react';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-
 const LandingPage = () => {
+  const googleButtonRef = useRef(null);
+
+  useEffect(() => {
+    // Load Google Identity Services script
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = initializeGoogleSignIn;
+    document.head.appendChild(script);
+
+    return () => {
+      // Cleanup script saat component unmount
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
+  }, []);
+
+  const initializeGoogleSignIn = () => {
+    if (!window.google) return;
+
+    // Ambil Client ID dari environment variable
+    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+    
+    if (!clientId) {
+      console.error('REACT_APP_GOOGLE_CLIENT_ID tidak ditemukan di .env');
+      return;
+    }
+
+    // Initialize Google Sign-In
+    window.google.accounts.id.initialize({
+      client_id: clientId,
+      callback: handleCredentialResponse,
+      auto_select: false,
+      ux_mode: 'popup',
+    });
+
+    // Render button di navbar jika ref sudah tersedia
+    if (googleButtonRef.current) {
+      window.google.accounts.id.renderButton(
+        googleButtonRef.current,
+        {
+          theme: 'filled_blue',
+          size: 'large',
+          shape: 'pill',
+          text: 'signin_with',
+          width: 250,
+        }
+      );
+    }
+  };
+
+  const handleCredentialResponse = async (response) => {
+    try {
+      // Decode JWT token dari Google
+      const credential = response.credential;
+      const payload = JSON.parse(atob(credential.split('.')[1]));
+      
+      console.log('Login berhasil!');
+      console.log('User Info:', payload);
+
+      // Simpan token dan user info ke localStorage
+      localStorage.setItem('google_token', credential);
+      localStorage.setItem('user', JSON.stringify({
+        name: payload.name,
+        email: payload.email,
+        picture: payload.picture,
+        sub: payload.sub,
+      }));
+
+      // OPSIONAL: Kirim token ke backend untuk verifikasi
+      const backendUrl = process.env.REACT_APP_BACKEND_URL;
+      if (backendUrl) {
+        try {
+          const backendResponse = await fetch(`${backendUrl}/api/auth/google`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              token: credential,
+              user: {
+                name: payload.name,
+                email: payload.email,
+                picture: payload.picture,
+              }
+            }),
+          });
+          
+          if (backendResponse.ok) {
+            const data = await backendResponse.json();
+            console.log('Backend response:', data);
+            
+            // Simpan session token dari backend jika ada
+            if (data.sessionToken) {
+              localStorage.setItem('session_token', data.sessionToken);
+            }
+          }
+        } catch (error) {
+          console.error('Backend error:', error);
+          // Lanjutkan login meskipun backend error
+        }
+      }
+
+      // Redirect ke dashboard
+      window.location.href = '/dashboard';
+      
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Login gagal, silakan coba lagi');
+    }
+  };
+
+  // Function handleLogin untuk trigger Google Sign-In popup
   const handleLogin = () => {
-    const redirectUrl = `${window.location.origin}/dashboard`;
-    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+    if (!window.google) {
+      alert('Google Sign-In sedang dimuat, silakan coba lagi dalam beberapa detik');
+      return;
+    }
+
+    // Trigger Google Sign-In popup
+    window.google.accounts.id.prompt((notification) => {
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        console.log('Popup dismissed by user');
+      }
+    });
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-green-100">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
@@ -21,6 +143,8 @@ const LandingPage = () => {
             </div>
             <span className="text-xl font-bold text-green-800">EcoCollect</span>
           </div>
+          
+          {/* Button custom "Masuk dengan Google" */}
           <Button 
             onClick={handleLogin}
             className="bg-green-600 hover:bg-green-700 text-white rounded-full px-6"
@@ -35,7 +159,7 @@ const LandingPage = () => {
       <section className="pt-32 pb-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="animate-fade-in">
+            <div>
               <div className="inline-flex items-center px-4 py-2 bg-green-100 rounded-full mb-6">
                 <Leaf className="w-4 h-4 text-green-600 mr-2" />
                 <span className="text-sm font-medium text-green-700">Solusi Ramah Lingkungan</span>
@@ -67,7 +191,7 @@ const LandingPage = () => {
                 </Button>
               </div>
             </div>
-            <div className="relative animate-slide-up">
+            <div className="relative">
               <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl">
                 <img 
                   src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&q=80" 
@@ -93,7 +217,7 @@ const LandingPage = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 card-hover" data-testid="feature-easy-booking">
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-lg transition-shadow" data-testid="feature-easy-booking">
               <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center mb-4">
                 <Truck className="w-6 h-6 text-white" />
               </div>
@@ -103,7 +227,7 @@ const LandingPage = () => {
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 card-hover" data-testid="feature-waste-separation">
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-lg transition-shadow" data-testid="feature-waste-separation">
               <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center mb-4">
                 <Recycle className="w-6 h-6 text-white" />
               </div>
@@ -113,7 +237,7 @@ const LandingPage = () => {
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 card-hover" data-testid="feature-tracking">
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-lg transition-shadow" data-testid="feature-tracking">
               <div className="w-12 h-12 bg-green-700 rounded-xl flex items-center justify-center mb-4">
                 <CheckCircle2 className="w-6 h-6 text-white" />
               </div>
@@ -123,7 +247,7 @@ const LandingPage = () => {
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 card-hover" data-testid="feature-certified">
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-lg transition-shadow" data-testid="feature-certified">
               <div className="w-12 h-12 bg-emerald-700 rounded-xl flex items-center justify-center mb-4">
                 <Award className="w-6 h-6 text-white" />
               </div>
