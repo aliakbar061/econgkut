@@ -70,10 +70,21 @@ const BookingForm = () => {
     }
   };
 
+    // ✅ Fungsi format Rupiah
+  const formatRupiah = (amount) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
   const selectedWasteType = wasteTypes.find(w => w.id === formData.waste_type_id);
   const estimatedPrice = selectedWasteType && formData.estimated_weight 
     ? (selectedWasteType.price_per_kg * parseFloat(formData.estimated_weight)).toFixed(2)
     : '0.00';
+    
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-green-100">
@@ -230,12 +241,15 @@ const BookingForm = () => {
             />
           </div>
 
+
+
           {/* Price Estimate */}
+          
           {estimatedPrice !== '0.00' && (
             <div className="p-4 bg-green-50 border border-green-200 rounded-xl" data-testid="price-estimate">
               <div className="flex justify-between items-center">
                 <span className="text-green-900 font-medium">Estimasi Biaya:</span>
-                <span className="text-2xl font-bold text-green-600">${estimatedPrice}</span>
+                <span className="text-2xl font-bold text-green-600">Rp. {formatRupiah(amount)}</span>
               </div>
               <p className="text-sm text-gray-600 mt-2">Biaya final akan dikonfirmasi setelah penimbangan aktual</p>
             </div>
