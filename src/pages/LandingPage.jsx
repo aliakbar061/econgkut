@@ -1,9 +1,14 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Leaf, Recycle, Truck, Award, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { AuthContext } from '@/App';
+import { toast } from 'sonner';
 
 const LandingPage = () => {
   const googleButtonRef = useRef(null);
+  const { setUser, axiosInstance } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -58,41 +63,22 @@ const LandingPage = () => {
       
       console.log('Login berhasil:', payload.email);
 
-      const backendUrl = process.env.REACT_APP_BACKEND_URL;
-      
-      if (!backendUrl) {
-        console.error('REACT_APP_BACKEND_URL tidak ditemukan');
-        alert('Konfigurasi backend tidak ditemukan');
-        return;
-      }
-
-      // Send token to backend
-      const backendResponse = await fetch(`${backendUrl}/api/auth/google`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ 
-          token: credential,
-          user: {
-            name: payload.name,
-            email: payload.email,
-            picture: payload.picture,
-          }
-        }),
+      // ✅ Gunakan axiosInstance dari context
+      const backendResponse = await axiosInstance.post('/auth/google', { 
+        token: credential,
+        user: {
+          name: payload.name,
+          email: payload.email,
+          picture: payload.picture,
+        }
       });
-      
-      if (!backendResponse.ok) {
-        throw new Error('Backend authentication failed');
-      }
 
-      const data = await backendResponse.json();
+      const data = backendResponse.data;
       console.log('Backend response:', data);
       
-      // Store session token in localStorage for Authorization header
+      // ✅ PENTING: Simpan dengan key 'sessionToken' (konsisten dengan App.js)
       if (data.sessionToken) {
-        localStorage.setItem('session_token', data.sessionToken);
+        localStorage.setItem('sessionToken', data.sessionToken);
         localStorage.setItem('user', JSON.stringify({
           id: data.id,
           name: data.name,
@@ -100,20 +86,32 @@ const LandingPage = () => {
           picture: data.picture,
           role: data.role
         }));
+        
+        // ✅ Update user context
+        setUser({
+          id: data.id,
+          name: data.name,
+          email: data.email,
+          picture: data.picture,
+          role: data.role
+        });
       }
 
-      // Redirect to dashboard
-      window.location.href = '/dashboard';
+      // ✅ Show success toast
+      toast.success(`Selamat datang, ${data.name}!`);
+      
+      // ✅ Redirect to dashboard using navigate
+      navigate('/dashboard');
       
     } catch (error) {
       console.error('Login error:', error);
-      alert('Login gagal: ' + error.message);
+      toast.error('Login gagal: ' + (error.response?.data?.detail || error.message));
     }
   };
 
   const handleLogin = () => {
     if (!window.google) {
-      alert('Google Sign-In sedang dimuat, silakan coba lagi');
+      toast.warning('Google Sign-In sedang dimuat, silakan coba lagi');
       return;
     }
 
