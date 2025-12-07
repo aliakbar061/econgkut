@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Truck, Plus, History, LogOut, Calendar, Package, User, LayoutDashboard } from 'lucide-react';
 
 const Dashboard = () => {
-  const { user, logout, axiosInstance } = useContext(AuthContext); // ← Tambahkan axiosInstance
+  const { user, logout, axiosInstance } = useContext(AuthContext);
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +18,7 @@ const Dashboard = () => {
 
   const seedData = async () => {
     try {
-      await axiosInstance.post('/seed-data'); // ← Ganti axios dengan axiosInstance
+      await axiosInstance.post('/seed-data');
       console.log('✅ Seed data called');
     } catch (error) {
       console.log('Seed data error:', error);
@@ -27,13 +27,23 @@ const Dashboard = () => {
 
   const fetchRecentBookings = async () => {
     try {
-      const response = await axiosInstance.get('/bookings'); // ← Ganti axios dengan axiosInstance
+      const response = await axiosInstance.get('/bookings');
       setBookings(response.data.slice(0, 5));
     } catch (error) {
       console.error('Error fetching bookings:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  // ✅ Fungsi format Rupiah
+  const formatRupiah = (amount) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
   };
 
   const getStatusColor = (status) => {
@@ -171,7 +181,8 @@ const Dashboard = () => {
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span className="font-semibold text-green-600">Rp. {booking.estimated_price.toFixed(2)}</span>
+                    {/* ✅ Format Rupiah dengan pemisah ribuan */}
+                    <span className="font-semibold text-green-600">{formatRupiah(booking.estimated_price)}</span>
                   </div>
                 </div>
               ))}
