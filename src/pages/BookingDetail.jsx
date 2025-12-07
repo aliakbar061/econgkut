@@ -238,7 +238,7 @@ const BookingDetail = () => {
                   ? 'bg-green-100 text-green-700 border border-green-300' 
                   : 'bg-orange-100 text-orange-700 border border-orange-300'
               }`} data-testid="payment-status">
-                {booking.payment_status === 'paid' ? '✅ Sudah Dibayar' : '⏳ Belum Dibayar'}
+                {booking.payment_status === 'paid' ? 'Sudah Dibayar' : 'Belum Dibayar'}
               </span>
             </div>
 
@@ -250,7 +250,7 @@ const BookingDetail = () => {
                 className="w-full bg-green-600 hover:bg-green-700 text-white text-lg py-6 rounded-xl"
                 data-testid="pay-now-button"
               >
-                {paymentLoading ? 'Memproses...' : `Bayar Sekarang - $${booking.estimated_price.toFixed(2)}`}
+                {paymentLoading ? 'Memproses...' : `Bayar Sekarang`}
               </Button>
             )}
           </div>
