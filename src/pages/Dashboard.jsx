@@ -133,8 +133,7 @@ const Dashboard = () => {
               variant="outline"
               onClick={() => navigate('/bookings')}
               className="border-green-600 text-green-700 hover:bg-green-50"
-              data-testid="view-all-bookings-button"
-            >
+              data-testid="view-all-bookings-button">
               Lihat Semua
             </Button>
           </div>
@@ -176,7 +175,7 @@ const Dashboard = () => {
                       <span>📅 {booking.pickup_date}</span>
                       <span>⚖️ {booking.estimated_weight} kg</span>
                     </div>
-                    <span className="font-semibold text-green-600">${booking.estimated_price.toFixed(2)}</span>
+                    <span className="font-semibold text-green-600">Rp. {booking.estimated_price.toFixed(2)}</span>
                   </div>
                 </div>
               ))}
