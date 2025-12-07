@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 const LandingPage = () => {
   const { setUser, axiosInstance } = useContext(AuthContext);
   const navigate = useNavigate();
+  const howItWorksRef = useRef(null);
 
   // ✅ STEP 1: Handle redirect callback dari Google (DEFINISI FUNGSI)
   const handleRedirectCallback = async () => {
@@ -161,6 +162,14 @@ const LandingPage = () => {
     window.location.href = googleAuthUrl;
   };
 
+  // ✅ Scroll ke section "Cara Kerja"
+  const scrollToHowItWorks = () => {
+    howItWorksRef.current?.scrollIntoView({ 
+      behavior: 'auto',
+      block: 'start'
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-green-100">
       {/* Navigation */}
@@ -212,9 +221,9 @@ const LandingPage = () => {
                 <Button 
                   variant="outline"
                   size="lg"
+                  onClick={scrollToHowItWorks}
                   className="border-2 border-green-600 text-green-700 hover:bg-green-50 rounded-full px-8 text-base"
                   data-testid="hero-learn-more-button"
-                  href="#lanjut"
                 >
                   Pelajari Lebih Lanjut
                 </Button>
@@ -290,9 +299,9 @@ const LandingPage = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-green-600 to-emerald-700 text-white">
+      <section ref={howItWorksRef} className="py-20 px-6 bg-gradient-to-br from-green-600 to-emerald-700 text-white">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16" id="lanjut">
+          <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4">Cara Kerja</h2>
             <p className="text-lg text-green-100 max-w-2xl mx-auto">
               Proses pemesanan yang sederhana dan cepat
