@@ -169,7 +169,7 @@ const BookingDetail = () => {
               </p>
               <div className="bg-red-50 border border-red-200 rounded-lg p-3">
                 <p className="text-sm text-red-800 font-medium">
-                  ⚠️ Tindakan ini tidak dapat dibatalkan
+                  Tindakan ini tidak dapat dibatalkan
                 </p>
               </div>
             </div>
@@ -304,7 +304,6 @@ const BookingDetail = () => {
             {/* Payment Method Info */}
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
               <div className="flex items-start space-x-3">
-                <Wallet className="w-6 h-6 text-blue-600 mt-1" />
                 <div>
                   <p className="font-semibold text-blue-900 mb-1">Metode Pembayaran</p>
                   <p className="text-sm text-blue-700">
@@ -316,13 +315,13 @@ const BookingDetail = () => {
 
             {/* Payment Status */}
             <div className="flex items-center justify-between mb-4">
-              <span className="text-lg font-semibold text-gray-800">Status Pembayaran:</span>
+              <span className="text-lg font-semibold text-gray-800">Status:</span>
               <span className={`px-4 py-2 rounded-full text-sm font-medium ${
                 currentPaymentStatus === 'paid' 
                   ? 'bg-green-100 text-green-700 border border-green-300' 
                   : 'bg-orange-100 text-orange-700 border border-orange-300'
               }`} data-testid="payment-status">
-                {currentPaymentStatus === 'paid' ? '✓ Sudah Dibayar' : '⏳ Belum Dibayar'}
+                {currentPaymentStatus === 'paid' ? '✓ Sudah Dibayar' : 'Belum Dibayar'}
               </span>
             </div>
 
@@ -330,7 +329,7 @@ const BookingDetail = () => {
             {booking.status === 'pending' && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-center">
                 <p className="text-yellow-800 font-medium">
-                  ⏳ Pemesanan Anda sedang menunggu konfirmasi dari admin.
+                  Pemesanan Anda sedang menunggu konfirmasi dari admin.
                 </p>
               </div>
             )}
@@ -338,7 +337,7 @@ const BookingDetail = () => {
             {booking.status === 'confirmed' && (
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
                 <p className="text-blue-800 font-medium">
-                  ✓ Pemesanan telah dikonfirmasi. Truk akan segera menuju lokasi Anda.
+                  Pemesanan telah dikonfirmasi. Truk akan segera menuju lokasi Anda.
                 </p>
               </div>
             )}
@@ -346,7 +345,7 @@ const BookingDetail = () => {
             {booking.status === 'in-transit' && (
               <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
                 <p className="text-purple-800 font-medium">
-                  🚚 Truk sedang dalam perjalanan ke lokasi Anda. Siapkan pembayaran tunai.
+                  Truk sedang dalam perjalanan ke lokasi Anda. Siapkan pembayaran tunai.
                 </p>
               </div>
             )}
@@ -354,7 +353,7 @@ const BookingDetail = () => {
             {booking.status === 'completed' && (
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
                 <p className="text-green-800 font-medium">
-                  🎉 Sampah telah diambil dan pembayaran selesai. Terima kasih!
+                  Sampah telah diambil dan pembayaran selesai. Terima kasih!
                 </p>
               </div>
             )}
@@ -369,7 +368,7 @@ const BookingDetail = () => {
                   className="w-full bg-red-600 hover:bg-red-700 text-white"
                   data-testid="delete-booking-button"
                 >
-                  {deleteLoading ? 'Menghapus...' : '🗑️ Hapus Pemesanan'}
+                  {deleteLoading ? 'Menghapus...' : 'Hapus Pemesanan'}
                 </Button>
                 <p className="text-xs text-gray-500 text-center mt-2">
                   Pemesanan yang sudah dikonfirmasi tidak dapat dihapus
