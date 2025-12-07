@@ -41,53 +41,14 @@ const BookingDetail = () => {
     }
   };
 
-  // ✅ Fungsi untuk konfirmasi pemesanan (bukan payment)
-  const handleConfirmBooking = async () => {
-    setConfirmLoading(true);
-    try {
-      // ✅ Coba beberapa endpoint yang mungkin ada
-      let response;
-      
-      try {
-        // Opsi 1: PATCH /bookings/{id}/confirm
-        response = await axiosInstance.patch(`/bookings/${booking.id}/confirm`);
-      } catch (e) {
-        if (e.response?.status === 404) {
-          try {
-            // Opsi 2: PATCH /bookings/{id}/status
-            response = await axiosInstance.patch(`/bookings/${booking.id}/status`, {
-              status: 'confirmed'
-            });
-          } catch (e2) {
-            if (e2.response?.status === 404) {
-              // Opsi 3: PATCH /bookings/{id}
-              response = await axiosInstance.patch(`/bookings/${booking.id}`, {
-                status: 'confirmed'
-              });
-            } else {
-              throw e2;
-            }
-          }
-        } else {
-          throw e;
-        }
-      }
-      
-      toast.success('Pemesanan berhasil dikonfirmasi!');
-      
-      // Update local state
-      setBooking(response.data);
-      
-    } catch (error) {
-      console.error('Confirm booking error:', error);
-      if (error.response?.status === 404) {
-        toast.error('Endpoint konfirmasi tidak tersedia. Silakan hubungi admin.');
-      } else if (error.response?.status !== 401) {
-        toast.error(error.response?.data?.detail || 'Gagal mengkonfirmasi pemesanan');
-      }
-    } finally {
-      setConfirmLoading(false);
-    }
+  // ✅ Fungsi format Rupiah
+  const formatRupiah = (amount) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
   };
 
   const getStatusColor = (status) => {
@@ -125,6 +86,14 @@ const BookingDetail = () => {
     }
   };
 
+  // ✅ LOGIKA: Otomatis tampilkan "Sudah Dibayar" jika status completed
+  const displayPaymentStatus = () => {
+    if (booking.status === 'completed') {
+      return 'paid'; // ✅ Force payment status menjadi paid jika completed
+    }
+    return booking.payment_status;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 flex items-center justify-center">
@@ -145,6 +114,8 @@ const BookingDetail = () => {
       </div>
     );
   }
+
+  const currentPaymentStatus = displayPaymentStatus();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-green-100">
@@ -239,7 +210,7 @@ const BookingDetail = () => {
                 <CreditCard className="w-6 h-6 text-green-600 mt-1" />
                 <div className="flex-1">
                   <p className="text-sm text-gray-600 mb-1">Estimasi Biaya</p>
-                  <p className="text-2xl font-bold text-green-600">Rp {booking.estimated_price.toLocaleString('id-ID')}</p>
+                  <p className="text-2xl font-bold text-green-600">{formatRupiah(booking.estimated_price)}</p>
                 </div>
               </div>
             </div>
@@ -255,9 +226,10 @@ const BookingDetail = () => {
 
           {/* Payment Info & Action */}
           <div className="mt-8 pt-6 border-t border-gray-200">
-            {/* ✅ Payment Method Info */}
+            {/* Payment Method Info */}
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
               <div className="flex items-start space-x-3">
+                <Wallet className="w-6 h-6 text-blue-600 mt-1" />
                 <div>
                   <p className="font-semibold text-blue-900 mb-1">Metode Pembayaran</p>
                   <p className="text-sm text-blue-700">
@@ -267,33 +239,31 @@ const BookingDetail = () => {
               </div>
             </div>
 
-            {/* Payment Status */}
+            {/* ✅ Payment Status - Otomatis "Sudah Dibayar" jika completed */}
             <div className="flex items-center justify-between mb-4">
-              <span className="text-lg font-semibold text-gray-800">Status:</span>
+              <span className="text-lg font-semibold text-gray-800">Status Pembayaran:</span>
               <span className={`px-4 py-2 rounded-full text-sm font-medium ${
-                booking.payment_status === 'paid' 
+                currentPaymentStatus === 'paid' 
                   ? 'bg-green-100 text-green-700 border border-green-300' 
                   : 'bg-orange-100 text-orange-700 border border-orange-300'
               }`} data-testid="payment-status">
-                {booking.payment_status === 'paid' ? 'Sudah Dibayar' : 'Belum Dibayar'}
+                {currentPaymentStatus === 'paid' ? '✓ Sudah Dibayar' : '⏳ Belum Dibayar'}
               </span>
             </div>
 
-            {/* ✅ Info - Tidak perlu konfirmasi manual */}
+            {/* Status Info */}
             {booking.status === 'pending' && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-center">
                 <p className="text-yellow-800 font-medium">
-                  Pemesanan Anda sedang menunggu konfirmasi dari admin. 
-                  Pemesanan akan dikonfirmasi segera.
+                  ⏳ Pemesanan Anda sedang menunggu konfirmasi dari admin.
                 </p>
               </div>
             )}
 
-            {/* ✅ Info untuk status lainnya */}
             {booking.status === 'confirmed' && (
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-                <p className="text-green-800 font-medium">
-                  Pemesanan telah dikonfirmasi. Truk akan segera menuju lokasi Anda.
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+                <p className="text-blue-800 font-medium">
+                  ✓ Pemesanan telah dikonfirmasi. Truk akan segera menuju lokasi Anda.
                 </p>
               </div>
             )}
@@ -301,7 +271,7 @@ const BookingDetail = () => {
             {booking.status === 'in-transit' && (
               <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
                 <p className="text-purple-800 font-medium">
-                  Truk sedang dalam perjalanan ke lokasi Anda. Siapkan pembayaran tunai.
+                  🚚 Truk sedang dalam perjalanan ke lokasi Anda. Siapkan pembayaran tunai.
                 </p>
               </div>
             )}
@@ -309,7 +279,7 @@ const BookingDetail = () => {
             {booking.status === 'completed' && (
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
                 <p className="text-green-800 font-medium">
-                  Sampah telah diambil dan pembayaran selesai. Terima kasih!
+                  🎉 Sampah telah diambil dan pembayaran selesai. Terima kasih!
                 </p>
               </div>
             )}
