@@ -52,6 +52,16 @@ const MyBookings = () => {
     setFilteredBookings(filtered);
   };
 
+  // ✅ Fungsi format Rupiah
+  const formatRupiah = (amount) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
   const getStatusColor = (status) => {
     const colors = {
       pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
@@ -177,7 +187,7 @@ const MyBookings = () => {
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span className="font-semibold text-green-600">Rp. {booking.estimated_price.toFixed(2)}</span>
+                    <span className="font-semibold text-green-600">{formatRupiah(booking.estimated_price)}</span>
                   </div>
                 </div>
               ))}
