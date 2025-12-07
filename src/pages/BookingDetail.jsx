@@ -2,19 +2,18 @@ import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from '@/App';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Truck, MapPin, Calendar, Clock, Weight, Package, CreditCard, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Truck, MapPin, Calendar, Clock, Weight, Package, CreditCard, CheckCircle2, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BookingDetail = () => {
-  const { user, axiosInstance } = useContext(AuthContext); // ✅ Ambil axiosInstance dari context
+  const { user, axiosInstance } = useContext(AuthContext);
   const navigate = useNavigate();
   const { id } = useParams();
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   useEffect(() => {
-    // ✅ Check auth first
     if (!user) {
       toast.error('Silakan login terlebih dahulu');
       navigate('/');
@@ -26,16 +25,14 @@ const BookingDetail = () => {
 
   const fetchBooking = async () => {
     try {
-      const response = await axiosInstance.get(`/bookings/${id}`); // ✅ Gunakan axiosInstance
+      const response = await axiosInstance.get(`/bookings/${id}`);
       setBooking(response.data);
     } catch (error) {
       console.error('Fetch booking error:', error);
       
-      // ✅ Handle different error cases
       if (error.response?.status === 404) {
         toast.error('Pemesanan tidak ditemukan');
       } else if (error.response?.status !== 401) {
-        // 401 sudah di-handle oleh interceptor
         toast.error('Gagal memuat detail pemesanan');
       }
       
@@ -45,22 +42,25 @@ const BookingDetail = () => {
     }
   };
 
-  const handlePayment = async () => {
-    setPaymentLoading(true);
+  // ✅ Fungsi untuk konfirmasi pemesanan (bukan payment)
+  const handleConfirmBooking = async () => {
+    setConfirmLoading(true);
     try {
-      const response = await axiosInstance.post('/payments/checkout', { // ✅ Gunakan axiosInstance
-        booking_id: booking.id,
-        origin_url: window.location.origin
-      });
+      // Ubah status dari pending ke confirmed
+      const response = await axiosInstance.patch(`/bookings/${booking.id}/confirm`);
       
-      // Redirect to Stripe checkout
-      window.location.href = response.data.url;
+      toast.success('Pemesanan berhasil dikonfirmasi!');
+      
+      // Update local state
+      setBooking(response.data);
+      
     } catch (error) {
-      console.error('Payment error:', error);
+      console.error('Confirm booking error:', error);
       if (error.response?.status !== 401) {
-        toast.error(error.response?.data?.detail || 'Gagal membuat sesi pembayaran');
+        toast.error(error.response?.data?.detail || 'Gagal mengkonfirmasi pemesanan');
       }
-      setPaymentLoading(false);
+    } finally {
+      setConfirmLoading(false);
     }
   };
 
@@ -99,7 +99,6 @@ const BookingDetail = () => {
     }
   };
 
-  // ✅ Show loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 flex items-center justify-center">
@@ -108,7 +107,6 @@ const BookingDetail = () => {
     );
   }
 
-  // ✅ Handle case when booking is null after loading
   if (!booking) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 flex items-center justify-center">
@@ -215,7 +213,7 @@ const BookingDetail = () => {
                 <CreditCard className="w-6 h-6 text-green-600 mt-1" />
                 <div className="flex-1">
                   <p className="text-sm text-gray-600 mb-1">Estimasi Biaya</p>
-                  <p className="text-2xl font-bold text-green-600">Rp. {booking.estimated_price.toFixed(2)}</p>
+                  <p className="text-2xl font-bold text-green-600">Rp {booking.estimated_price.toLocaleString('id-ID')}</p>
                 </div>
               </div>
             </div>
@@ -229,29 +227,68 @@ const BookingDetail = () => {
             )}
           </div>
 
-          {/* Payment Status */}
+          {/* Payment Info & Action */}
           <div className="mt-8 pt-6 border-t border-gray-200">
+            {/* ✅ Payment Method Info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+              <div className="flex items-start space-x-3">
+                <Wallet className="w-5 h-5 text-blue-600 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-blue-900 mb-1">Metode Pembayaran</p>
+                  <p className="text-sm text-blue-700">
+                    Pembayaran dilakukan secara <strong>tunai (cash)</strong> setelah sampah diambil oleh mitra pengangkut.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Status */}
             <div className="flex items-center justify-between mb-4">
-              <span className="text-lg font-semibold text-gray-800">Status:</span>
+              <span className="text-lg font-semibold text-gray-800">Status Pembayaran:</span>
               <span className={`px-4 py-2 rounded-full text-sm font-medium ${
                 booking.payment_status === 'paid' 
                   ? 'bg-green-100 text-green-700 border border-green-300' 
                   : 'bg-orange-100 text-orange-700 border border-orange-300'
               }`} data-testid="payment-status">
-                {booking.payment_status === 'paid' ? 'Sudah Dibayar' : 'Belum Dibayar'}
+                {booking.payment_status === 'paid' ? 'Sudah Dibayar' : 'Belum Dibayar (Bayar di Tempat)'}
               </span>
             </div>
 
-            {/* Payment Button */}
-            {booking.payment_status !== 'paid' && booking.status !== 'cancelled' && (
+            {/* ✅ Confirm Booking Button - Hanya tampil jika status pending */}
+            {booking.status === 'pending' && (
               <Button
-                onClick={handlePayment}
-                disabled={paymentLoading}
+                onClick={handleConfirmBooking}
+                disabled={confirmLoading}
                 className="w-full bg-green-600 hover:bg-green-700 text-white text-lg py-6 rounded-xl"
-                data-testid="pay-now-button"
+                data-testid="confirm-booking-button"
               >
-                {paymentLoading ? 'Memproses...' : `Bayar Sekarang`}
+                {confirmLoading ? 'Memproses...' : 'Konfirmasi Pemesanan'}
               </Button>
+            )}
+
+            {/* ✅ Info untuk status lainnya */}
+            {booking.status === 'confirmed' && (
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                <p className="text-green-800 font-medium">
+                  ✓ Pemesanan telah dikonfirmasi. Truk akan segera menuju lokasi Anda.
+                </p>
+              </div>
+            )}
+
+            {booking.status === 'in-transit' && (
+              <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
+                <p className="text-purple-800 font-medium">
+                  🚚 Truk sedang dalam perjalanan ke lokasi Anda. Siapkan pembayaran tunai.
+                </p>
+              </div>
+            )}
+
+            {booking.status === 'completed' && (
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                <p className="text-green-800 font-medium">
+                  ✓ Sampah telah diambil dan pembayaran selesai. Terima kasih!
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -311,8 +348,8 @@ const BookingDetail = () => {
                 ✓
               </div>
               <div>
-                <p className="font-semibold text-gray-900">Selesai</p>
-                <p className="text-sm text-gray-500">Sampah telah diambil</p>
+                <p className="font-semibold text-gray-900">Selesai & Dibayar</p>
+                <p className="text-sm text-gray-500">Sampah telah diambil dan pembayaran selesai</p>
               </div>
             </div>
           </div>
