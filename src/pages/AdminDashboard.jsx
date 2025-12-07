@@ -87,10 +87,10 @@ const AdminDashboard = () => {
   // ✅ LOGIKA: Display payment status berdasarkan booking status
   const getPaymentStatus = (booking) => {
     if (booking.status === 'completed') {
-      return { text: '✓ Dibayar', color: 'text-green-600' };
+      return { text: 'Dibayar', color: 'text-green-600' };
     }
     return { 
-      text: booking.payment_status === 'paid' ? '✓ Dibayar' : 'Belum Dibayar', 
+      text: booking.payment_status === 'paid' ? 'Dibayar' : 'Belum Dibayar', 
       color: booking.payment_status === 'paid' ? 'text-green-600' : 'text-orange-600' 
     };
   };
@@ -127,7 +127,7 @@ const AdminDashboard = () => {
               <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
                 <Truck className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-green-800">ECOngkut Admin</span>
+              <span className="text-xl font-bold text-green-800">ECOngkut</span>
             </div>
             
             <UserMenu user={user} onLogout={logout} />
