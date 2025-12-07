@@ -171,10 +171,6 @@ const Dashboard = () => {
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm text-gray-500">
-                    <div className="flex items-center space-x-4">
-                      <span>📅 {booking.pickup_date}</span>
-                      <span>⚖️ {booking.estimated_weight} kg</span>
-                    </div>
                     <span className="font-semibold text-green-600">Rp. {booking.estimated_price.toFixed(2)}</span>
                   </div>
                 </div>

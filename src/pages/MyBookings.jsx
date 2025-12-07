@@ -174,13 +174,10 @@ const MyBookings = () => {
                           {getStatusText(booking.status)}
                         </span>
                       </div>
-                      <p className="text-gray-600 mb-2">📍 {booking.pickup_address}</p>
+                      <p className="text-gray-600 mb-2">{booking.pickup_address}</p>
                       <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <span>📅 {booking.pickup_date}</span>
-                        <span>🕔 {booking.pickup_time}</span>
-                        <span>⚖️ {booking.estimated_weight} kg</span>
                         <span className={`font-medium ${booking.payment_status === 'paid' ? 'text-green-600' : 'text-orange-600'}`}>
-                          {booking.payment_status === 'paid' ? '✅ Dibayar' : '⏳ Belum Dibayar'}
+                          {booking.payment_status === 'paid' ? 'Dibayar' : 'Belum Dibayar'}
                         </span>
                       </div>
                     </div>
