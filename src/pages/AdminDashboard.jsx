@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Truck, BarChart3, Package, DollarSign, Trash2, User } from 'lucide-react';
 import { toast } from 'sonner';
-import UserMenu from '@/components/UserMenu';
+import UserMenu from '@/components/ui/UserMenu';
 
 const AdminDashboard = () => {
   const { user, logout, axiosInstance } = useContext(AuthContext); // ✅ Tambahkan axiosInstance
