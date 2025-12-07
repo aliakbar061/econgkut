@@ -139,7 +139,7 @@ const LandingPage = () => {
             className="bg-green-600 hover:bg-green-700 text-white rounded-full px-6"
             data-testid="nav-login-button"
           >
-            Masuk dengan Google
+            Masuk
           </Button>
         </div>
       </nav>
