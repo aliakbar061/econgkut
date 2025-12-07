@@ -11,7 +11,6 @@ const BookingDetail = () => {
   const { id } = useParams();
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [confirmLoading, setConfirmLoading] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -46,8 +45,33 @@ const BookingDetail = () => {
   const handleConfirmBooking = async () => {
     setConfirmLoading(true);
     try {
-      // Ubah status dari pending ke confirmed
-      const response = await axiosInstance.patch(`/bookings/${booking.id}/confirm`);
+      // ✅ Coba beberapa endpoint yang mungkin ada
+      let response;
+      
+      try {
+        // Opsi 1: PATCH /bookings/{id}/confirm
+        response = await axiosInstance.patch(`/bookings/${booking.id}/confirm`);
+      } catch (e) {
+        if (e.response?.status === 404) {
+          try {
+            // Opsi 2: PATCH /bookings/{id}/status
+            response = await axiosInstance.patch(`/bookings/${booking.id}/status`, {
+              status: 'confirmed'
+            });
+          } catch (e2) {
+            if (e2.response?.status === 404) {
+              // Opsi 3: PATCH /bookings/{id}
+              response = await axiosInstance.patch(`/bookings/${booking.id}`, {
+                status: 'confirmed'
+              });
+            } else {
+              throw e2;
+            }
+          }
+        } else {
+          throw e;
+        }
+      }
       
       toast.success('Pemesanan berhasil dikonfirmasi!');
       
@@ -56,7 +80,9 @@ const BookingDetail = () => {
       
     } catch (error) {
       console.error('Confirm booking error:', error);
-      if (error.response?.status !== 401) {
+      if (error.response?.status === 404) {
+        toast.error('Endpoint konfirmasi tidak tersedia. Silakan hubungi admin.');
+      } else if (error.response?.status !== 401) {
         toast.error(error.response?.data?.detail || 'Gagal mengkonfirmasi pemesanan');
       }
     } finally {
@@ -254,16 +280,14 @@ const BookingDetail = () => {
               </span>
             </div>
 
-            {/* ✅ Confirm Booking Button - Hanya tampil jika status pending */}
+            {/* ✅ Info - Tidak perlu konfirmasi manual */}
             {booking.status === 'pending' && (
-              <Button
-                onClick={handleConfirmBooking}
-                disabled={confirmLoading}
-                className="w-full bg-green-600 hover:bg-green-700 text-white text-lg py-6 rounded-xl"
-                data-testid="confirm-booking-button"
-              >
-                {confirmLoading ? 'Memproses...' : 'Konfirmasi Pemesanan'}
-              </Button>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-center">
+                <p className="text-yellow-800 font-medium">
+                  ⏳ Pemesanan Anda sedang menunggu konfirmasi dari admin. 
+                  Anda akan dihubungi segera.
+                </p>
+              </div>
             )}
 
             {/* ✅ Info untuk status lainnya */}

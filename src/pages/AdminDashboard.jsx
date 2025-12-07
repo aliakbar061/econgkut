@@ -1,42 +1,57 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { AuthContext } from '@/App';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Truck, BarChart3, Package, DollarSign, Trash2, User } from 'lucide-react';
 import { toast } from 'sonner';
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+import UserMenu from '@/components/UserMenu';
 
 const AdminDashboard = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, axiosInstance } = useContext(AuthContext); // ✅ Tambahkan axiosInstance
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // ✅ Check if user is admin
+    if (!user) {
+      navigate('/');
+      return;
+    }
+    
+    if (user.role !== 'admin') {
+      toast.error('Akses ditolak. Hanya admin yang bisa mengakses halaman ini.');
+      navigate('/dashboard');
+      return;
+    }
+
     fetchStats();
     fetchAllBookings();
-  }, []);
+  }, [user, navigate]);
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get(`${API}/admin/stats`, { withCredentials: true });
+      const response = await axiosInstance.get('/admin/stats'); // ✅ Gunakan axiosInstance
       setStats(response.data);
     } catch (error) {
-      toast.error('Gagal memuat statistik');
+      console.error('Fetch stats error:', error);
+      if (error.response?.status !== 401) {
+        toast.error('Gagal memuat statistik');
+      }
     }
   };
 
   const fetchAllBookings = async () => {
     try {
-      const response = await axios.get(`${API}/admin/bookings`, { withCredentials: true });
+      const response = await axiosInstance.get('/admin/bookings'); // ✅ Gunakan axiosInstance
       setBookings(response.data);
     } catch (error) {
-      toast.error('Gagal memuat pemesanan');
+      console.error('Fetch bookings error:', error);
+      if (error.response?.status !== 401) {
+        toast.error('Gagal memuat pemesanan');
+      }
     } finally {
       setLoading(false);
     }
@@ -44,16 +59,18 @@ const AdminDashboard = () => {
 
   const updateBookingStatus = async (bookingId, newStatus) => {
     try {
-      await axios.patch(
-        `${API}/admin/bookings/${bookingId}`,
-        { status: newStatus },
-        { withCredentials: true }
+      await axiosInstance.patch( // ✅ Gunakan axiosInstance
+        `/admin/bookings/${bookingId}`,
+        { status: newStatus }
       );
       toast.success('Status berhasil diupdate');
       fetchAllBookings();
       fetchStats();
     } catch (error) {
-      toast.error('Gagal mengupdate status');
+      console.error('Update status error:', error);
+      if (error.response?.status !== 401) {
+        toast.error('Gagal mengupdate status');
+      }
     }
   };
 
@@ -85,23 +102,15 @@ const AdminDashboard = () => {
       <nav className="bg-white border-b border-green-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/dashboard')}
-                className="text-green-700"
-                data-testid="back-to-dashboard-button"
-              >
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Kembali
-              </Button>
-            </div>
             <div className="flex items-center space-x-2">
               <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
                 <Truck className="w-6 h-6 text-white" />
               </div>
               <span className="text-xl font-bold text-green-800">ECOngkut Admin</span>
             </div>
+            
+            {/* ✅ User Menu with logout */}
+            <UserMenu user={user} onLogout={logout} />
           </div>
         </div>
       </nav>
@@ -141,7 +150,7 @@ const AdminDashboard = () => {
                 <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                   <DollarSign className="w-6 h-6 text-green-600" />
                 </div>
-                <span className="text-3xl font-bold text-green-600">${stats.total_revenue.toFixed(2)}</span>
+                <span className="text-3xl font-bold text-green-600">Rp {stats.total_revenue.toLocaleString('id-ID')}</span>
               </div>
               <p className="text-gray-600 font-medium">Total Pendapatan</p>
             </div>
@@ -162,6 +171,16 @@ const AdminDashboard = () => {
         <div className="bg-white rounded-2xl shadow-lg border border-green-100 p-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-green-900">Semua Pemesanan</h2>
+            <Button
+              variant="outline"
+              onClick={() => {
+                fetchAllBookings();
+                fetchStats();
+              }}
+              className="border-green-600 text-green-700 hover:bg-green-50"
+            >
+              Refresh
+            </Button>
           </div>
 
           {loading ? (
@@ -176,7 +195,7 @@ const AdminDashboard = () => {
               {bookings.map((booking) => (
                 <div
                   key={booking.id}
-                  className="p-6 border border-gray-200 rounded-xl hover:border-green-300 hover:shadow-md"
+                  className="p-6 border border-gray-200 rounded-xl hover:border-green-300 hover:shadow-md transition-all"
                   data-testid={`admin-booking-item-${booking.id}`}
                 >
                   <div className="grid md:grid-cols-4 gap-4 items-center">
@@ -195,7 +214,7 @@ const AdminDashboard = () => {
                     <div>
                       <p className="text-sm text-gray-600">Berat & Harga</p>
                       <p className="font-medium text-gray-900">{booking.estimated_weight} kg</p>
-                      <p className="text-lg font-bold text-green-600">${booking.estimated_price.toFixed(2)}</p>
+                      <p className="text-lg font-bold text-green-600">Rp {booking.estimated_price.toLocaleString('id-ID')}</p>
                       <p className={`text-xs mt-1 ${booking.payment_status === 'paid' ? 'text-green-600' : 'text-orange-600'}`}>
                         {booking.payment_status === 'paid' ? '✓ Dibayar' : '⏳ Belum Dibayar'}
                       </p>
