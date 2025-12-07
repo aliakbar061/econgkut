@@ -6,11 +6,13 @@ import { AuthContext } from '@/App';
 import { toast } from 'sonner';
 
 const LandingPage = () => {
-  const googleButtonRef = useRef(null);
   const { setUser, axiosInstance } = useContext(AuthContext);
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Check if redirected back from Google with credential
+    handleRedirectCallback();
+
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
     script.async = true;
@@ -25,6 +27,19 @@ const LandingPage = () => {
     };
   }, []);
 
+  // ✅ Handle redirect callback dari Google
+  const handleRedirectCallback = async () => {
+    // Google akan menambahkan credential ke URL hash setelah redirect
+    const params = new URLSearchParams(window.location.search);
+    const credential = params.get('credential');
+    
+    if (credential) {
+      await processGoogleCredential(credential);
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  };
+
   const initializeGoogleSignIn = () => {
     if (!window.google) return;
 
@@ -37,33 +52,20 @@ const LandingPage = () => {
 
     window.google.accounts.id.initialize({
       client_id: clientId,
-      callback: handleCredentialResponse,
+      callback: handleCredentialResponse, // Fallback untuk popup jika redirect gagal
       auto_select: false,
-      ux_mode: 'popup',
+      ux_mode: 'redirect', // ✅ UBAH KE REDIRECT
+      redirect_uri: window.location.origin, // ✅ URL untuk redirect kembali
     });
-
-    if (googleButtonRef.current) {
-      window.google.accounts.id.renderButton(
-        googleButtonRef.current,
-        {
-          theme: 'filled_blue',
-          size: 'large',
-          shape: 'pill',
-          text: 'signin_with',
-          width: 250,
-        }
-      );
-    }
   };
 
-  const handleCredentialResponse = async (response) => {
+  // ✅ Process credential (untuk popup dan redirect)
+  const processGoogleCredential = async (credential) => {
     try {
-      const credential = response.credential;
       const payload = JSON.parse(atob(credential.split('.')[1]));
       
       console.log('Login berhasil:', payload.email);
 
-      // ✅ Gunakan axiosInstance dari context
       const backendResponse = await axiosInstance.post('/auth/google', { 
         token: credential,
         user: {
@@ -76,7 +78,6 @@ const LandingPage = () => {
       const data = backendResponse.data;
       console.log('Backend response:', data);
       
-      // ✅ PENTING: Simpan dengan key 'sessionToken' (konsisten dengan App.js)
       if (data.sessionToken) {
         localStorage.setItem('sessionToken', data.sessionToken);
         localStorage.setItem('user', JSON.stringify({
@@ -87,7 +88,6 @@ const LandingPage = () => {
           role: data.role
         }));
         
-        // ✅ Update user context
         setUser({
           id: data.id,
           name: data.name,
@@ -97,10 +97,7 @@ const LandingPage = () => {
         });
       }
 
-      // ✅ Show success toast
       toast.success(`Selamat datang, ${data.name}!`);
-      
-      // ✅ Redirect to dashboard using navigate
       navigate('/dashboard');
       
     } catch (error) {
@@ -109,15 +106,22 @@ const LandingPage = () => {
     }
   };
 
+  // ✅ Callback untuk popup mode (fallback)
+  const handleCredentialResponse = async (response) => {
+    await processGoogleCredential(response.credential);
+  };
+
+  // ✅ Trigger Google Sign-In redirect
   const handleLogin = () => {
     if (!window.google) {
       toast.warning('Google Sign-In sedang dimuat, silakan coba lagi');
       return;
     }
 
+    // Redirect ke Google Login page
     window.google.accounts.id.prompt((notification) => {
       if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-        console.log('Popup dismissed by user');
+        console.log('Google prompt not displayed, triggering manual redirect');
       }
     });
   };
