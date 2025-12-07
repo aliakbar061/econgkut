@@ -216,7 +216,7 @@ const AdminDashboard = () => {
                       <p className="font-medium text-gray-900">{booking.estimated_weight} kg</p>
                       <p className="text-lg font-bold text-green-600">Rp {booking.estimated_price.toLocaleString('id-ID')}</p>
                       <p className={`text-xs mt-1 ${booking.payment_status === 'paid' ? 'text-green-600' : 'text-orange-600'}`}>
-                        {booking.payment_status === 'paid' ? '✓ Dibayar' : '⏳ Belum Dibayar'}
+                        {booking.payment_status === 'paid' ? 'Dibayar' : 'Belum Dibayar'}
                       </p>
                     </div>
 
