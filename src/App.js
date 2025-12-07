@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "@/utils/api";
 import LandingPage from "@/pages/LandingPage";
 import Dashboard from "@/pages/Dashboard";
 import BookingForm from "@/pages/BookingForm";
@@ -10,9 +10,6 @@ import BookingDetail from "@/pages/BookingDetail";
 import PaymentSuccess from "@/pages/PaymentSuccess";
 import AdminDashboard from "@/pages/AdminDashboard";
 import { Toaster } from "@/components/ui/sonner";
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
 
 export const AuthContext = React.createContext(null);
 
