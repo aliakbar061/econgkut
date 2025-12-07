@@ -136,7 +136,7 @@ const BookingDetail = () => {
                 data-testid="back-to-bookings-button"
               >
                 <ArrowLeft className="w-5 h-5 mr-2" />
-                Kembali ke Riwayat
+                Kembali
               </Button>
             </div>
             <div className="flex items-center space-x-2">
