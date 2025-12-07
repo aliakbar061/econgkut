@@ -128,7 +128,7 @@ const Dashboard = () => {
         {/* Recent Bookings */}
         <div className="bg-white rounded-2xl shadow-lg border border-green-100 p-8">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-green-900">Pemesanan Terbaru</h2>
+            <h2 className="text-2xl font-bold text-green-900">Terbaru</h2>
             <Button
               variant="outline"
               onClick={() => navigate('/bookings')}
