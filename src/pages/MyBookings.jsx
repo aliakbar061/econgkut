@@ -158,35 +158,26 @@ const MyBookings = () => {
               )}
             </div>
           ) : (
-            <div className="space-y-4" data-testid="bookings-list">
-              {filteredBookings.map((booking) => (
+            
+             <div className="space-y-4" data-testid="bookings-list">
+              {bookings.map((booking) => (
                 <div
                   key={booking.id}
-                  className="p-6 border border-gray-200 rounded-xl hover:border-green-300 hover:shadow-md cursor-pointer card-hover"
+                  className="p-6 border border-gray-200 rounded-xl hover:border-green-300 hover:shadow-md cursor-pointer"
                   onClick={() => navigate(`/bookings/${booking.id}`)}
                   data-testid={`booking-item-${booking.id}`}
                 >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="font-semibold text-xl text-green-900">{booking.waste_type_name}</h3>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(booking.status)}`}>
-                          {getStatusText(booking.status)}
-                        </span>
-                      </div>
-                      <p className="text-gray-600 mb-2">{booking.pickup_address}</p>
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <span className={`font-medium ${booking.payment_status === 'paid' ? 'text-green-600' : 'text-orange-600'}`}>
-                          {booking.payment_status === 'paid' ? 'Dibayar' : 'Belum Dibayar'}
-                        </span>
-                      </div>
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="font-semibold text-lg text-green-900">{booking.waste_type_name}</h3>
+                      <p className="text-sm text-gray-600">{booking.pickup_address}</p>
                     </div>
-                    <div className="flex items-center space-x-4">
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-green-600">Rp. {booking.estimated_price.toFixed(2)}</p>
-                      </div>
-                      <ChevronRight className="w-6 h-6 text-gray-400" />
-                    </div>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
+                      {getStatusText(booking.status)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-gray-500">
+                    <span className="font-semibold text-green-600">Rp. {booking.estimated_price.toFixed(2)}</span>
                   </div>
                 </div>
               ))}
