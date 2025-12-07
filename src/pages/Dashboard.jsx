@@ -70,32 +70,6 @@ const Dashboard = () => {
               </div>
               <UserMenu user={user} onLogout={logout} />
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 px-4 py-2 bg-green-50 rounded-full" data-testid="user-profile">
-                <User className="w-4 h-4 text-green-600" />
-                <span className="text-sm font-medium text-green-700">{user?.name}</span>
-              </div>
-              {user?.role === 'admin' && (
-                <Button
-                  variant="outline"
-                  onClick={() => navigate('/admin')}
-                  className="border-green-600 text-green-700 hover:bg-green-50"
-                  data-testid="admin-dashboard-nav-button"
-                >
-                  <LayoutDashboard className="w-4 h-4 mr-2" />
-                  Admin Panel
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                onClick={logout}
-                className="border-red-300 text-red-600 hover:bg-red-50"
-                data-testid="logout-button"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Keluar
-              </Button>
-            </div>
           </div>
         </div>
       </nav>
