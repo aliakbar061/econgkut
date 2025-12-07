@@ -2,7 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/App';
 import { Button } from '@/components/ui/button';
-import UserMenu from '@/components/UserMenu'; // ✅ Import UserMenu
+import UserMenu from '@/components/ui/UserMenu'; // ✅ Import UserMenu
 import { Truck, Plus, History, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 
