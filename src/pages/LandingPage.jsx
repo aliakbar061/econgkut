@@ -6,7 +6,6 @@ const LandingPage = () => {
   const googleButtonRef = useRef(null);
 
   useEffect(() => {
-    // Load Google Identity Services script
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
     script.async = true;
@@ -15,7 +14,6 @@ const LandingPage = () => {
     document.head.appendChild(script);
 
     return () => {
-      // Cleanup script saat component unmount
       if (script.parentNode) {
         script.parentNode.removeChild(script);
       }
@@ -25,15 +23,13 @@ const LandingPage = () => {
   const initializeGoogleSignIn = () => {
     if (!window.google) return;
 
-    // Ambil Client ID dari environment variable
     const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
     
     if (!clientId) {
-      console.error('REACT_APP_GOOGLE_CLIENT_ID tidak ditemukan di .env');
+      console.error('REACT_APP_GOOGLE_CLIENT_ID tidak ditemukan');
       return;
     }
 
-    // Initialize Google Sign-In
     window.google.accounts.id.initialize({
       client_id: clientId,
       callback: handleCredentialResponse,
@@ -41,7 +37,6 @@ const LandingPage = () => {
       ux_mode: 'popup',
     });
 
-    // Render button di navbar jika ref sudah tersedia
     if (googleButtonRef.current) {
       window.google.accounts.id.renderButton(
         googleButtonRef.current,
@@ -58,73 +53,70 @@ const LandingPage = () => {
 
   const handleCredentialResponse = async (response) => {
     try {
-      // Decode JWT token dari Google
       const credential = response.credential;
       const payload = JSON.parse(atob(credential.split('.')[1]));
       
-      console.log('Login berhasil!');
-      console.log('User Info:', payload);
+      console.log('Login berhasil:', payload.email);
 
-      // Simpan token dan user info ke localStorage
-      localStorage.setItem('google_token', credential);
-      localStorage.setItem('user', JSON.stringify({
-        name: payload.name,
-        email: payload.email,
-        picture: payload.picture,
-        sub: payload.sub,
-      }));
-
-      // OPSIONAL: Kirim token ke backend untuk verifikasi
       const backendUrl = process.env.REACT_APP_BACKEND_URL;
-      if (backendUrl) {
-        try {
-          const backendResponse = await fetch(`${backendUrl}/api/auth/google`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ 
-              token: credential,
-              user: {
-                name: payload.name,
-                email: payload.email,
-                picture: payload.picture,
-              }
-            }),
-          });
-          
-          if (backendResponse.ok) {
-            const data = await backendResponse.json();
-            console.log('Backend response:', data);
-            
-            // Simpan session token dari backend jika ada
-            if (data.sessionToken) {
-              localStorage.setItem('session_token', data.sessionToken);
-            }
-          }
-        } catch (error) {
-          console.error('Backend error:', error);
-          // Lanjutkan login meskipun backend error
-        }
+      
+      if (!backendUrl) {
+        console.error('REACT_APP_BACKEND_URL tidak ditemukan');
+        alert('Konfigurasi backend tidak ditemukan');
+        return;
       }
 
-      // Redirect ke dashboard
+      // Send token to backend
+      const backendResponse = await fetch(`${backendUrl}/api/auth/google`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ 
+          token: credential,
+          user: {
+            name: payload.name,
+            email: payload.email,
+            picture: payload.picture,
+          }
+        }),
+      });
+      
+      if (!backendResponse.ok) {
+        throw new Error('Backend authentication failed');
+      }
+
+      const data = await backendResponse.json();
+      console.log('Backend response:', data);
+      
+      // Store session token in localStorage for Authorization header
+      if (data.sessionToken) {
+        localStorage.setItem('session_token', data.sessionToken);
+        localStorage.setItem('user', JSON.stringify({
+          id: data.id,
+          name: data.name,
+          email: data.email,
+          picture: data.picture,
+          role: data.role
+        }));
+      }
+
+      // Redirect to dashboard
       window.location.href = '/dashboard';
       
     } catch (error) {
       console.error('Login error:', error);
-      alert('Login gagal, silakan coba lagi');
+      alert('Login gagal: ' + error.message);
     }
   };
 
-  // Function handleLogin untuk trigger Google Sign-In popup
   const handleLogin = () => {
     if (!window.google) {
-      alert('Google Sign-In sedang dimuat, silakan coba lagi dalam beberapa detik');
+      alert('Google Sign-In sedang dimuat, silakan coba lagi');
       return;
     }
 
-    // Trigger Google Sign-In popup
     window.google.accounts.id.prompt((notification) => {
       if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
         console.log('Popup dismissed by user');
@@ -144,7 +136,6 @@ const LandingPage = () => {
             <span className="text-xl font-bold text-green-800">EcoCollect</span>
           </div>
           
-          {/* Button custom "Masuk dengan Google" */}
           <Button 
             onClick={handleLogin}
             className="bg-green-600 hover:bg-green-700 text-white rounded-full px-6"
