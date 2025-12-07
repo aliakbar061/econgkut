@@ -26,7 +26,7 @@ const axiosInstance = axios.create({
 // ✅ Add Authorization header to all requests
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('sessionToken'); // ✅ Konsisten dengan backend response
+    const token = localStorage.getItem('sessionToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -37,25 +37,39 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// ✅ Add response interceptor to handle 401 errors globally
+// ✅ IMPROVED: Response interceptor dengan handling yang lebih baik
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
+    // ✅ Hanya handle 401 untuk endpoint yang memerlukan auth
     if (error.response?.status === 401) {
-      // Clear auth data
-      localStorage.removeItem('sessionToken');
-      localStorage.removeItem('user');
+      const requestUrl = error.config?.url || '';
       
-      // Show toast only if not already on login page
-      if (window.location.pathname !== '/') {
-        toast.error('Sesi Anda telah berakhir. Silakan login kembali');
+      // ✅ Jangan auto-logout untuk endpoint tertentu atau saat di landing page
+      const isAuthEndpoint = requestUrl.includes('/auth/');
+      const isPublicEndpoint = requestUrl.includes('/waste-types') || requestUrl.includes('/seed-data');
+      const isOnLandingPage = window.location.pathname === '/';
+      
+      // ✅ Hanya clear session jika bukan di landing page dan bukan endpoint public
+      if (!isOnLandingPage && !isPublicEndpoint && !isAuthEndpoint) {
+        // Clear auth data
+        localStorage.removeItem('sessionToken');
+        localStorage.removeItem('user');
         
-        // Redirect to login after short delay
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 1500);
+        // ✅ Tampilkan toast hanya sekali dengan flag
+        if (!window.logoutToastShown) {
+          window.logoutToastShown = true;
+          toast.error('Sesi Anda telah berakhir. Silakan login kembali');
+          
+          // Redirect ke login setelah delay
+          setTimeout(() => {
+            window.logoutToastShown = false; // Reset flag
+            window.location.href = '/';
+          }, 1500);
+        }
       }
     }
+    
     return Promise.reject(error);
   }
 );
@@ -73,20 +87,42 @@ function App() {
 
   const checkSession = async () => {
     try {
-      const token = localStorage.getItem('sessionToken'); // ✅ Konsisten
+      const token = localStorage.getItem('sessionToken');
       
       if (!token) {
         setLoading(false);
         return;
       }
 
-      const response = await axiosInstance.get('/auth/me');
-      setUser(response.data);
+      // ✅ Tambahkan retry logic untuk menghindari false positive
+      let retries = 0;
+      const maxRetries = 2;
+      
+      while (retries < maxRetries) {
+        try {
+          const response = await axiosInstance.get('/auth/me');
+          setUser(response.data);
+          break; // Success, keluar dari loop
+        } catch (error) {
+          retries++;
+          
+          // Jika network error dan masih ada retry, coba lagi
+          if (error.code === 'ERR_NETWORK' && retries < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+            continue;
+          }
+          
+          // Jika 401 atau sudah max retries, throw error
+          throw error;
+        }
+      }
     } catch (error) {
-      console.log('No active session');
-      // Clear invalid token
-      localStorage.removeItem('sessionToken');
-      localStorage.removeItem('user');
+      console.log('No active session or session expired');
+      // ✅ Hanya clear jika benar-benar 401, bukan network error
+      if (error.response?.status === 401) {
+        localStorage.removeItem('sessionToken');
+        localStorage.removeItem('user');
+      }
     } finally {
       setLoading(false);
     }
@@ -102,7 +138,14 @@ function App() {
       localStorage.removeItem('sessionToken');
       localStorage.removeItem('user');
       setUser(null);
-      window.location.href = '/';
+      
+      // ✅ Tampilkan toast sukses logout
+      toast.success('Berhasil logout');
+      
+      // Navigate ke landing page
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 500);
     }
   };
 
