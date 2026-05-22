@@ -217,9 +217,9 @@ const StaffDashboard = () => {
             <div className="w-9 h-9 sm:w-10 sm:h-10 bg-teal-600 rounded-full flex items-center justify-center flex-shrink-0">
               <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
-            <div className="hidden xs:block sm:block">
-              <p className="font-bold text-teal-900 leading-none text-sm sm:text-base">ECOngkut</p>
-              <p className="text-xs text-teal-600">Portal Absensi Staff</p>
+            <div className="hidden sm:block">
+              <p className="font-bold text-teal-900 leading-none text-sm sm:text-base truncate max-w-[150px] sm:max-w-none">ECOngkut</p>
+              <p className="text-xs text-teal-600 truncate max-w-[150px] sm:max-w-none">Portal Absensi Staff</p>
             </div>
           </div>
           <UserMenu user={user} onLogout={logout} />
@@ -242,9 +242,9 @@ const StaffDashboard = () => {
         {/* Status Hari Ini Banner */}
         {sudahAbsenHariIni && todayRecord && (
           <div className={`mb-5 sm:mb-6 p-3 sm:p-4 rounded-xl border flex items-start sm:items-center gap-3 ${attendanceBadge[todayRecord.status]?.color || 'bg-gray-100'}`}>
-            <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5 sm:mt-0" />
+            <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5 sm:mt-0 hidden sm:block" />
             <div className="min-w-0">
-              <p className="font-semibold text-sm sm:text-base">
+              <p className="font-semibold text-sm sm:text-base truncate">
                 Sudah absen hari ini —&nbsp;
                 <span className="uppercase">{todayRecord.status}</span>
               </p>
@@ -260,9 +260,9 @@ const StaffDashboard = () => {
 
           {/* ── FORM ABSENSI ── */}
           <div className="bg-white rounded-2xl shadow-lg border border-teal-100 p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl font-bold text-teal-900 mb-4 sm:mb-5 flex items-center gap-2">
-              <ClipboardCheck className="w-5 h-5 text-teal-600 flex-shrink-0" />
-              Catat Kehadiran Hari Ini
+            <h2 className="text-lg sm:text-xl font-bold text-teal-900 mb-4 sm:mb-5 flex items-center gap-2 truncate">
+              <ClipboardCheck className="w-5 h-5 text-teal-600 flex-shrink-0 hidden sm:block" />
+              <span className="truncate">Catat Kehadiran Hari Ini</span>
             </h2>
 
             <div className="space-y-4 sm:space-y-5">
@@ -374,9 +374,9 @@ const StaffDashboard = () => {
             {/* Ekspor — Kepala Divisi & Admin */}
             {isHead && (
               <div className="bg-white rounded-2xl shadow-lg border border-emerald-100 p-4 sm:p-6 border-l-4 border-l-emerald-500">
-                <h2 className="text-base sm:text-lg font-bold text-emerald-900 mb-3 sm:mb-4 flex items-center gap-2">
-                  <Download className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-                  Ekspor Laporan Bulanan
+                <h2 className="text-base sm:text-lg font-bold text-emerald-900 mb-3 sm:mb-4 flex items-center gap-2 truncate">
+                  <Download className="w-5 h-5 text-emerald-600 flex-shrink-0 hidden sm:block" />
+                  <span className="truncate">Ekspor Laporan Bulanan</span>
                 </h2>
                 <div className="flex gap-2 mb-3 sm:mb-4">
                   <select
@@ -410,9 +410,9 @@ const StaffDashboard = () => {
             {/* Riwayat Absensi Pribadi */}
             <div className="bg-white rounded-2xl shadow-lg border border-teal-100 p-4 sm:p-6 flex flex-col"
               style={{ maxHeight: isHead ? '380px' : '520px' }}>
-              <h2 className="text-base sm:text-lg font-bold text-teal-900 mb-3 sm:mb-4 flex items-center gap-2 flex-shrink-0">
-                <History className="w-5 h-5 text-teal-600 flex-shrink-0" />
-                Riwayat Absensi Saya
+              <h2 className="text-base sm:text-lg font-bold text-teal-900 mb-3 sm:mb-4 flex items-center gap-2 flex-shrink-0 truncate">
+                <History className="w-5 h-5 text-teal-600 flex-shrink-0 hidden sm:block" />
+                <span className="truncate">Riwayat Absensi</span>
               </h2>
               <div className="overflow-y-auto flex-1 space-y-2 sm:space-y-3 pr-1">
                 {loadingHistory ? (

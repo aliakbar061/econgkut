@@ -267,16 +267,16 @@ const AdminDashboard = () => {
             <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
               <Truck className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-green-800">ECOngkut Admin</span>
+            <span className="text-lg sm:text-xl font-bold text-green-800 hidden sm:block truncate">ECOngkut Admin</span>
           </div>
           <UserMenu user={user} onLogout={logout} />
         </div>
       </nav>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-green-900 mb-2">Admin Dashboard</h1>
-          <p className="text-lg text-gray-600">Kelola pemesanan, staff, dan laporan absensi</p>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-4xl font-bold text-green-900 mb-2 truncate">Admin Dashboard</h1>
+          <p className="text-sm sm:text-lg text-gray-600 truncate">Kelola pemesanan, staff, dan laporan absensi</p>
         </div>
 
         {/* Stats Cards */}
@@ -288,21 +288,21 @@ const AdminDashboard = () => {
               { label: 'Total Pendapatan', value: formatRupiah(stats.total_revenue), icon: DollarSign, color: 'green', allowed: user?.role === 'admin' || user?.division === 'Keuangan' },
               { label: 'Sampah Terkumpul', value: `${stats.total_waste_collected.toFixed(1)} kg`, icon: Trash2, color: 'emerald' },
             ].filter(s => s.allowed !== false).map(({ label, value, icon: Icon, color }) => (
-              <div key={label} className="p-6 bg-white rounded-2xl shadow-lg border border-green-100">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`w-12 h-12 bg-${color}-100 rounded-xl flex items-center justify-center`}>
-                    <Icon className={`w-6 h-6 text-${color}-600`} />
+              <div key={label} className="p-4 sm:p-6 bg-white rounded-2xl shadow-lg border border-green-100">
+                <div className="flex items-center justify-between mb-2 sm:mb-4">
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-${color}-100 rounded-xl flex items-center justify-center`}>
+                    <Icon className={`w-5 h-5 sm:w-6 sm:h-6 text-${color}-600`} />
                   </div>
-                  <span className={`text-2xl font-bold text-${color}-600`}>{value}</span>
+                  <span className={`text-xl sm:text-2xl font-bold text-${color}-600 truncate max-w-[150px] sm:max-w-none text-right`} title={value}>{value}</span>
                 </div>
-                <p className="text-gray-600 font-medium">{label}</p>
+                <p className="text-sm sm:text-base text-gray-600 font-medium truncate" title={label}>{label}</p>
               </div>
             ))}
           </div>
         )}
 
         {/* Tab Navigation */}
-        <div className="flex overflow-x-auto pb-1 mb-6 border-b border-gray-200 hide-scrollbar space-x-2">
+        <div className="flex pb-1 mb-6 border-b border-gray-200 space-x-1 sm:space-x-2">
           {[
             { id: 'bookings', label: 'Pemesanan', icon: ClipboardList, allowed: user?.role === 'admin' || ['Operasional', 'Pengolahan', 'Operasional & Pengolahan'].includes(user?.division) },
             { id: 'staff', label: 'Manajemen Staff', icon: Users, allowed: user?.role === 'admin' || ['SDM', 'IT', 'SDM & IT'].includes(user?.division) },
@@ -311,14 +311,15 @@ const AdminDashboard = () => {
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex items-center space-x-2 px-5 py-3 text-sm font-semibold rounded-t-lg border-b-2 transition-colors ${
+              title={label}
+              className={`flex flex-1 sm:flex-none justify-center items-center space-x-0 sm:space-x-2 px-2 sm:px-5 py-3 text-sm font-semibold rounded-t-lg border-b-2 transition-colors ${
                 activeTab === id
                   ? 'border-green-600 text-green-700 bg-green-50'
                   : 'border-transparent text-gray-500 hover:text-green-700 hover:bg-gray-50'
               }`}
             >
-              <Icon className="w-4 h-4" />
-              <span>{label}</span>
+              <Icon className="w-5 h-5 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">{label}</span>
             </button>
           ))}
         </div>
@@ -345,27 +346,27 @@ const AdminDashboard = () => {
                   const pay = getPaymentStatus(booking);
                   return (
                     <div key={booking.id} className="p-6 border border-gray-200 rounded-xl hover:border-green-300 hover:shadow-md transition-all">
-                      <div className="grid md:grid-cols-4 gap-4 items-center">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-start sm:items-center">
                         <div>
-                          <h3 className="font-semibold text-lg text-green-900">{booking.waste_type_name}</h3>
-                          <p className="text-sm text-gray-600">{booking.user_email}</p>
-                          <p className="text-xs text-gray-500 mt-1">{booking.pickup_address}</p>
+                          <h3 className="font-semibold text-lg text-green-900 truncate" title={booking.waste_type_name}>{booking.waste_type_name}</h3>
+                          <p className="text-sm text-gray-600 truncate" title={booking.user_email}>{booking.user_email}</p>
+                          <p className="text-xs text-gray-500 mt-1 line-clamp-2" title={booking.pickup_address}>{booking.pickup_address}</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-600">Jadwal</p>
-                          <p className="font-medium">{booking.pickup_date}</p>
-                          <p className="text-sm text-gray-600">{booking.pickup_time}</p>
+                          <p className="font-medium truncate">{booking.pickup_date}</p>
+                          <p className="text-sm text-gray-600 truncate">{booking.pickup_time}</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-600">Berat & Harga</p>
-                          <p className="font-medium">{booking.estimated_weight} kg</p>
-                          <p className="text-lg font-bold text-green-600">{formatRupiah(booking.estimated_price)}</p>
-                          <p className={`text-xs mt-1 font-medium ${pay.color}`}>{pay.text}</p>
+                          <p className="font-medium truncate">{booking.estimated_weight} kg</p>
+                          <p className="text-lg font-bold text-green-600 truncate">{formatRupiah(booking.estimated_price)}</p>
+                          <p className={`text-xs mt-1 font-medium truncate ${pay.color}`}>{pay.text}</p>
                         </div>
-                        <div>
+                        <div className="w-full">
                           <p className="text-sm text-gray-600 mb-2">Update Status</p>
                           <Select value={booking.status} onValueChange={(v) => updateBookingStatus(booking.id, v)}>
-                            <SelectTrigger className={`${statusColor[booking.status] || 'bg-gray-100'} border-0 font-medium`}>
+                            <SelectTrigger className={`w-full ${statusColor[booking.status] || 'bg-gray-100'} border-0 font-medium`}>
                               <SelectValue>{statusText[booking.status] || booking.status}</SelectValue>
                             </SelectTrigger>
                             <SelectContent>
@@ -388,9 +389,9 @@ const AdminDashboard = () => {
         {activeTab === 'staff' && (
           <div className="bg-white rounded-2xl shadow-lg border border-green-100 p-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-green-900">Manajemen Staff</h2>
-                <p className="text-sm text-gray-500 mt-1">Atur role, divisi, dan posisi setiap pengguna</p>
+              <div className="min-w-0">
+                <h2 className="text-xl sm:text-2xl font-bold text-green-900 truncate">Manajemen Staff</h2>
+                <p className="text-xs sm:text-sm text-gray-500 mt-1 truncate">Atur role, divisi, dan posisi setiap pengguna</p>
               </div>
               <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
                 <div className="relative w-full sm:w-64">
@@ -451,7 +452,7 @@ const AdminDashboard = () => {
                                 className="font-semibold text-gray-800 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:outline-none focus:ring-0 px-0 max-w-[150px] transition-colors"
                                 title="Klik untuk mengedit nama"
                               />
-                              <p className="text-xs text-gray-500">{u.email}</p>
+                              <p className="text-xs text-gray-500 truncate max-w-[150px]" title={u.email}>{u.email}</p>
                             </div>
                           </div>
                         </td>

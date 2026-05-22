@@ -106,11 +106,11 @@ const Dashboard = () => {
 
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Welcome */}
-        <div className="mb-12 animate-fade-in">
-          <h1 className="text-4xl font-bold text-green-900 mb-2">
+        <div className="mb-8 sm:mb-12 animate-fade-in">
+          <h1 className="text-2xl sm:text-4xl font-bold text-green-900 mb-2 truncate">
             Selamat Datang, {user?.name}! 👋
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-sm sm:text-lg text-gray-600 truncate">
             {isStaff
               ? `Divisi: ${user?.division || 'Umum'} · Posisi: ${user?.position || 'Staff'}`
               : 'Kelola pemesanan pengangkutan sampah Anda dengan mudah'}
@@ -129,15 +129,15 @@ const Dashboard = () => {
                 data-testid="new-booking-card"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-14 h-14 bg-green-600 rounded-xl flex items-center justify-center">
-                    <Plus className="w-8 h-8 text-white" />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-green-600 rounded-xl flex items-center justify-center">
+                    <Plus className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                   </div>
-                  <Calendar className="w-6 h-6 text-green-400" />
+                  <Calendar className="w-6 h-6 text-green-400 hidden sm:block" />
                 </div>
-                <h2 className="text-2xl font-bold text-green-900 mb-2">Pemesanan Baru</h2>
-                <p className="text-gray-600 mb-4">Pesan truk pengangkutan sampah untuk lokasi Anda</p>
-                <div className="flex items-center text-green-600 font-medium">
-                  Mulai Pesan <Plus className="ml-2 w-5 h-5" />
+                <h2 className="text-xl sm:text-2xl font-bold text-green-900 mb-2 truncate">Pemesanan Baru</h2>
+                <p className="text-sm sm:text-base text-gray-600 mb-4 line-clamp-2">Pesan truk pengangkutan sampah untuk lokasi Anda</p>
+                <div className="flex items-center text-green-600 font-medium text-sm sm:text-base">
+                  Mulai Pesan <Plus className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
               </div>
 
@@ -147,15 +147,15 @@ const Dashboard = () => {
                 data-testid="my-bookings-card"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-14 h-14 bg-emerald-600 rounded-xl flex items-center justify-center">
-                    <History className="w-8 h-8 text-white" />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-emerald-600 rounded-xl flex items-center justify-center">
+                    <History className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                   </div>
-                  <Package className="w-6 h-6 text-emerald-400" />
+                  <Package className="w-6 h-6 text-emerald-400 hidden sm:block" />
                 </div>
-                <h2 className="text-2xl font-bold text-green-900 mb-2">Riwayat Pemesanan</h2>
-                <p className="text-gray-600 mb-4">Lihat semua pemesanan dan statusnya</p>
-                <div className="flex items-center text-emerald-600 font-medium">
-                  Lihat Riwayat <History className="ml-2 w-5 h-5" />
+                <h2 className="text-xl sm:text-2xl font-bold text-green-900 mb-2 truncate">Riwayat Pemesanan</h2>
+                <p className="text-sm sm:text-base text-gray-600 mb-4 line-clamp-2">Lihat semua pemesanan dan statusnya</p>
+                <div className="flex items-center text-emerald-600 font-medium text-sm sm:text-base">
+                  Lihat Riwayat <History className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
               </div>
             </>
@@ -169,15 +169,15 @@ const Dashboard = () => {
               data-testid="staff-attendance-card"
             >
               <div className="flex items-center justify-between mb-4">
-                <div className="w-14 h-14 bg-teal-600 rounded-xl flex items-center justify-center">
-                  <ClipboardCheck className="w-8 h-8 text-white" />
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-teal-600 rounded-xl flex items-center justify-center">
+                  <ClipboardCheck className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
-                <Users className="w-6 h-6 text-teal-400" />
+                <Users className="w-6 h-6 text-teal-400 hidden sm:block" />
               </div>
-              <h2 className="text-2xl font-bold text-teal-900 mb-2">Portal Absensi Staff</h2>
-              <p className="text-gray-600 mb-4">Catat kehadiran harian dengan lokasi GPS</p>
-              <div className="flex items-center text-teal-600 font-medium">
-                Buka Portal <ClipboardCheck className="ml-2 w-5 h-5" />
+              <h2 className="text-xl sm:text-2xl font-bold text-teal-900 mb-2 truncate">Portal Absensi Staff</h2>
+              <p className="text-sm sm:text-base text-gray-600 mb-4 line-clamp-2">Catat kehadiran harian dengan lokasi GPS</p>
+              <div className="flex items-center text-teal-600 font-medium text-sm sm:text-base">
+                Buka Portal <ClipboardCheck className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
           )}
@@ -190,15 +190,15 @@ const Dashboard = () => {
               data-testid="admin-dashboard-card"
             >
               <div className="flex items-center justify-between mb-4">
-                <div className="w-14 h-14 bg-purple-600 rounded-xl flex items-center justify-center">
-                  <LayoutDashboard className="w-8 h-8 text-white" />
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-purple-600 rounded-xl flex items-center justify-center">
+                  <LayoutDashboard className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
-                <User className="w-6 h-6 text-purple-400" />
+                <User className="w-6 h-6 text-purple-400 hidden sm:block" />
               </div>
-              <h2 className="text-2xl font-bold text-purple-900 mb-2">Admin Dashboard</h2>
-              <p className="text-gray-600 mb-4">{getAdminDashboardSubtitle()}</p>
-              <div className="flex items-center text-purple-600 font-medium">
-                Kelola Sistem <LayoutDashboard className="ml-2 w-5 h-5" />
+              <h2 className="text-xl sm:text-2xl font-bold text-purple-900 mb-2 truncate">Admin Dashboard</h2>
+              <p className="text-sm sm:text-base text-gray-600 mb-4 line-clamp-2">{getAdminDashboardSubtitle()}</p>
+              <div className="flex items-center text-purple-600 font-medium text-sm sm:text-base">
+                Kelola Sistem <LayoutDashboard className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
           )}
@@ -209,17 +209,17 @@ const Dashboard = () => {
         {/* Untuk staff: Riwayat Absensi Terbaru */}
         {isStaff && (
           <div className="bg-white rounded-2xl shadow-lg border border-teal-100 p-8">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-teal-900 flex items-center gap-2">
-                <ClipboardCheck className="w-6 h-6 text-teal-600" />
-                Riwayat Absensi Saya
+            <div className="flex justify-between items-center mb-6 gap-2">
+              <h2 className="text-lg sm:text-2xl font-bold text-teal-900 flex items-center gap-2 truncate">
+                <ClipboardCheck className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600 hidden sm:block" />
+                Riwayat Absensi
               </h2>
               <Button
                 variant="outline"
                 onClick={() => navigate('/staff')}
-                className="border-teal-600 text-teal-700 hover:bg-teal-50"
+                className="border-teal-600 text-teal-700 hover:bg-teal-50 px-3 sm:px-4 text-xs sm:text-sm h-8 sm:h-10 flex-shrink-0"
               >
-                Absen Sekarang
+                Absen
               </Button>
             </div>
 
@@ -228,12 +228,12 @@ const Dashboard = () => {
             ) : attendance.length === 0 ? (
               <div className="text-center py-12">
                 <ClipboardCheck className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg mb-4">Belum ada riwayat absensi</p>
+                <p className="text-sm sm:text-lg text-gray-500 mb-4 truncate">Belum ada riwayat absensi</p>
                 <Button
                   onClick={() => navigate('/staff')}
-                  className="bg-teal-600 hover:bg-teal-700 text-white"
+                  className="bg-teal-600 hover:bg-teal-700 text-white text-sm sm:text-base px-4 py-2"
                 >
-                  Mulai Absen Hari Ini
+                  Mulai Absen
                 </Button>
               </div>
             ) : (
@@ -315,12 +315,12 @@ const Dashboard = () => {
                     onClick={() => navigate(`/bookings/${booking.id}`)}
                     data-testid={`booking-item-${booking.id}`}
                   >
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <h3 className="font-semibold text-lg text-green-900">{booking.waste_type_name}</h3>
-                        <p className="text-sm text-gray-600">{booking.pickup_address}</p>
+                    <div className="flex justify-between items-start mb-3 gap-2">
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-lg text-green-900 truncate">{booking.waste_type_name}</h3>
+                        <p className="text-sm text-gray-600 truncate">{booking.pickup_address}</p>
                       </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
+                      <span className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
                         {getStatusText(booking.status)}
                       </span>
                     </div>
