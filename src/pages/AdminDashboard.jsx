@@ -118,6 +118,18 @@ const AdminDashboard = () => {
     } finally { setUpdatingUserId(null); }
   };
 
+  const deleteUser = async (userId) => {
+    if (!window.confirm('Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak dapat dibatalkan.')) return;
+    
+    try {
+      await axiosInstance.delete(`/admin/users/${userId}`);
+      toast.success('Pengguna berhasil dihapus');
+      setUsers(prev => prev.filter(u => u.id !== userId));
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Gagal menghapus pengguna');
+    }
+  };
+
   // ── Attendance Report ──────────────────────────────────────────────────────
   const fetchAttendanceReport = async () => {
     setLoadingReport(true);
@@ -344,7 +356,8 @@ const AdminDashboard = () => {
                       <th className="px-4 py-3 rounded-tl-lg font-semibold">Pengguna</th>
                       <th className="px-4 py-3 font-semibold">Role</th>
                       <th className="px-4 py-3 font-semibold">Divisi</th>
-                      <th className="px-4 py-3 rounded-tr-lg font-semibold">Posisi</th>
+                      <th className="px-4 py-3 font-semibold">Posisi</th>
+                      <th className="px-4 py-3 rounded-tr-lg font-semibold text-center">Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -417,6 +430,18 @@ const AdminDashboard = () => {
                               {POSITIONS.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
                             </SelectContent>
                           </Select>
+                        </td>
+                        <td className="px-4 py-4 text-center">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => deleteUser(u.id)}
+                            disabled={updatingUserId === u.id || (user?.role !== 'admin' && u.role === 'admin') || user?.id === u.id}
+                            className="text-red-500 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                            title="Hapus Pengguna"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </td>
                       </tr>
                     ))}
