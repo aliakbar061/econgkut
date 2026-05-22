@@ -162,31 +162,38 @@ const AdminDashboard = () => {
       "tgl": item.date.split('-')[2],
       "Nama": item.user_name,
       "Divisi": item.division || '-',
-      "Hadir": item.status === "Hadir" ? "✓" : "",
-      "Izin": item.status === "Izin" ? "✓" : "",
-      "Sakit": item.status === "Sakit" ? "✓" : "",
-      "Terlambat": item.status === "Terlambat" ? "✓" : "",
-      "Alpha": item.status === "Alpha" ? "✓" : "",
+      "Status Kehadiran": item.status,
       "Jam": item.time || '-',
     }));
 
     const ws = XLSX.utils.aoa_to_sheet([]);
     XLSX.utils.sheet_add_aoa(ws, [
-      ["Laporan Evaluasi Bulanan Karyawan"],
+      ["Laporan Absensi Bulanan Karyawan"],
       ["PT. ECOngkut Lestari Nusantara"],
-      [`Bulan: ${MONTH_NAMES[reportMonth - 1]}`, "", "", "", `Tahun: ${reportYear}`],
+      ["Bulan:", MONTH_NAMES[reportMonth - 1] || reportMonth, "", "Tahun:", reportYear],
       [],
-      ["tgl", "Nama", "Divisi", "Hadir", "Izin", "Sakit", "Terlambat", "Alpha", "Jam"]
+      ["tgl", "Nama", "Divisi", "Status Kehadiran", "Jam"]
     ], { origin: "A1" });
 
     // Merge title cells
     ws['!merges'] = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 8 } },
-      { s: { r: 1, c: 0 }, e: { r: 1, c: 8 } },
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } },
     ];
-    ws['!cols'] = [{ wch: 5 }, { wch: 25 }, { wch: 15 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 12 }, { wch: 8 }, { wch: 12 }];
+    ws['!cols'] = [{ wch: 5 }, { wch: 25 }, { wch: 15 }, { wch: 20 }, { wch: 12 }];
 
     XLSX.utils.sheet_add_json(ws, rows, { origin: "A6", skipHeader: true });
+
+    // Tambahkan Data Validation (Dropdown) untuk kolom Status Kehadiran (Kolom D) jika didukung
+    ws['!dataValidation'] = [
+      {
+        sqref: `D6:D${6 + rows.length + 50}`,
+        type: 'list',
+        allowBlank: true,
+        showDropDown: true,
+        formula1: '"Hadir,Izin,Sakit,Terlambat,Alpha"'
+      }
+    ];
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Laporan Absensi");
@@ -520,9 +527,9 @@ const AdminDashboard = () => {
 
             {/* Report Header Preview */}
             <div className="mb-6 py-8 px-4 bg-[#f0fdf4] rounded-2xl border border-green-100 text-center shadow-sm">
-              <p className="font-bold text-[#064e3b] text-xl mb-1">Laporan Evaluasi Bulanan Karyawan</p>
+              <p className="font-bold text-[#064e3b] text-xl mb-1">Laporan Absensi Bulanan Karyawan</p>
               <p className="font-medium text-[#065f46] text-lg mb-3">PT. ECOngkut Lestari Nusantara</p>
-              <p className="text-[#047857] text-sm font-medium">Bulan: {MONTH_NAMES[reportMonth - 1]} &nbsp;&nbsp;&nbsp; Tahun: {reportYear}</p>
+              <p className="text-[#047857] text-sm font-medium">Bulan: {MONTH_NAMES[reportMonth - 1] || reportMonth} &nbsp;&nbsp;&nbsp; Tahun: {reportYear}</p>
             </div>
 
             {loadingReport ? (
