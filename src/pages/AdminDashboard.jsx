@@ -4,7 +4,7 @@ import { AuthContext } from '@/App';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Truck, BarChart3, Package, DollarSign, Trash2, User, Users, ClipboardList, Download, Search } from 'lucide-react';
+import { ArrowLeft, Truck, BarChart3, Package, DollarSign, Trash2, User, Users, ClipboardList, Download, Search, LayoutDashboard } from 'lucide-react';
 import { toast } from 'sonner';
 import UserMenu from '@/components/ui/UserMenu';
 import * as XLSX from 'xlsx';
@@ -262,12 +262,23 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-green-100">
       {/* Nav */}
       <nav className="bg-white border-b border-green-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
-              <Truck className="w-6 h-6 text-white" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => navigate('/dashboard')}
+              className="p-2 bg-purple-50 hover:bg-purple-100 rounded-full text-purple-700 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <LayoutDashboard className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              </div>
+              <div>
+                <p className="font-bold text-purple-900 leading-none text-sm sm:text-base">Admin</p>
+                <p className="text-xs text-purple-600">Sistem & Kelola</p>
+              </div>
             </div>
-            <span className="text-lg sm:text-xl font-bold text-green-800 hidden sm:block truncate">ECOngkut Admin</span>
           </div>
           <UserMenu user={user} onLogout={logout} />
         </div>

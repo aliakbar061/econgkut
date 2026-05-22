@@ -5,7 +5,7 @@ import UserMenu from '@/components/ui/UserMenu';
 import { Button } from '@/components/ui/button';
 import {
   Download, History, Truck, MapPin, Loader2,
-  CheckCircle2, Clock, AlertCircle, ClipboardCheck, Navigation
+  CheckCircle2, Clock, AlertCircle, ClipboardCheck, Navigation, ArrowLeft
 } from 'lucide-react';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
@@ -213,13 +213,21 @@ const StaffDashboard = () => {
       {/* ── Nav ── */}
       <nav className="bg-white border-b border-teal-100 sticky top-0 z-50 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-teal-600 rounded-full flex items-center justify-center flex-shrink-0">
-              <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            </div>
-            <div className="hidden sm:block">
-              <p className="font-bold text-teal-900 leading-none text-sm sm:text-base truncate max-w-[150px] sm:max-w-none">ECOngkut</p>
-              <p className="text-xs text-teal-600 truncate max-w-[150px] sm:max-w-none">Portal Absensi Staff</p>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => navigate('/dashboard')}
+              className="p-2 bg-teal-50 hover:bg-teal-100 rounded-full text-teal-700 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-teal-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <ClipboardCheck className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              </div>
+              <div>
+                <p className="font-bold text-teal-900 leading-none text-sm sm:text-base">Staff</p>
+                <p className="text-xs text-teal-600">Portal Absensi</p>
+              </div>
             </div>
           </div>
           <UserMenu user={user} onLogout={logout} />
