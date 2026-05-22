@@ -171,17 +171,16 @@ function App() {
             <Route path="/bookings/:id" element={user ? <BookingDetail /> : <Navigate to="/" />} />
             <Route path="/payment-success" element={user ? <PaymentSuccess /> : <Navigate to="/" />} />
             <Route 
-            path="/admin" 
-            element={
-              <ProtectedRoute 
-                allowedRoles={['admin']} 
-                allowedDivisions={['Operasional', 'Pengolahan', 'Operasional & Pengolahan', 'SDM', 'IT', 'SDM & IT', 'Keuangan']}
-                allowedPositions={['Pimpinan']}
-              >
-                <AdminDashboard />
-              </ProtectedRoute>
-            } 
-          /><Route path="/staff" element={user?.role === 'staff' || user?.role === 'admin' ? <StaffDashboard /> : <Navigate to="/dashboard" />} />
+              path="/admin" 
+              element={
+                user?.role === 'admin' || 
+                (user?.role === 'staff' && ['SDM', 'IT', 'SDM & IT', 'Operasional', 'Pengolahan', 'Operasional & Pengolahan', 'Keuangan'].includes(user?.division)) || 
+                user?.position === 'Pimpinan' 
+                  ? <AdminDashboard /> 
+                  : <Navigate to="/dashboard" />
+              } 
+            />
+            <Route path="/staff" element={user?.role === 'staff' || user?.role === 'admin' ? <StaffDashboard /> : <Navigate to="/dashboard" />} />
             <Route path="/finance" element={user?.role === 'admin' || user?.division === 'Keuangan' || user?.position === 'Pimpinan' ? <FinanceDashboard /> : <Navigate to="/dashboard" />} />
           </Routes>
         </BrowserRouter>
