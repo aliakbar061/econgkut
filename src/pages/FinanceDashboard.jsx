@@ -189,11 +189,10 @@ const FinanceDashboard = () => {
             <div className="bg-white rounded-2xl p-5 sm:p-6 border border-green-100 shadow-sm relative overflow-hidden">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-sm font-semibold text-gray-500 mb-1">Total Pendapatan</p>
-                  <h3 className="text-2xl sm:text-3xl font-bold text-green-700">{formatRupiah(report.total_revenue)}</h3>
+                  <p className="text-sm font-semibold text-gray-500 mb-1">Total Pendapatan (Semua Waktu)</p>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-green-700">{formatRupiah(report.all_time_revenue || report.total_revenue)}</h3>
                   <p className="text-xs text-gray-400 mt-2">
-                    Dari {report.paid_bookings_count} pesanan berbayar
-                    {report.revenue_from_manual > 0 && ` + manual (${formatRupiah(report.revenue_from_manual)})`}
+                    Bulan ini: {formatRupiah(report.total_revenue)} ({report.paid_bookings_count} trx)
                   </p>
                 </div>
                 <div className="p-3 bg-green-50 rounded-xl">
@@ -205,9 +204,11 @@ const FinanceDashboard = () => {
             <div className="bg-white rounded-2xl p-5 sm:p-6 border border-red-100 shadow-sm relative overflow-hidden">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-sm font-semibold text-gray-500 mb-1">Total Pengeluaran</p>
-                  <h3 className="text-2xl sm:text-3xl font-bold text-red-600">{formatRupiah(report.total_expense)}</h3>
-                  <p className="text-xs text-gray-400 mt-2">Dari {report.transactions_count} pencatatan manual</p>
+                  <p className="text-sm font-semibold text-gray-500 mb-1">Total Pengeluaran (Semua Waktu)</p>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-red-600">{formatRupiah(report.all_time_expense || report.total_expense)}</h3>
+                  <p className="text-xs text-gray-400 mt-2">
+                    Bulan ini: {formatRupiah(report.total_expense)} ({report.transactions_count} trx)
+                  </p>
                 </div>
                 <div className="p-3 bg-red-50 rounded-xl">
                   <TrendingDown className="w-6 h-6 text-red-500" />
@@ -215,14 +216,16 @@ const FinanceDashboard = () => {
               </div>
             </div>
 
-            <div className={`bg-gradient-to-br ${report.net_profit >= 0 ? 'from-emerald-500 to-green-600' : 'from-orange-500 to-red-600'} rounded-2xl p-5 sm:p-6 shadow-md text-white relative overflow-hidden`}>
+            <div className={`bg-gradient-to-br ${((report.all_time_revenue || report.total_revenue) - (report.all_time_expense || report.total_expense)) >= 0 ? 'from-emerald-500 to-green-600' : 'from-orange-500 to-red-600'} rounded-2xl p-5 sm:p-6 shadow-md text-white relative overflow-hidden`}>
               <div className="flex justify-between items-start relative z-10">
                 <div>
                   <p className="text-sm font-semibold text-white/80 mb-1">
-                    {report.net_profit >= 0 ? 'Laba Bersih (Profit)' : 'Rugi Bersih (Loss)'}
+                    {((report.all_time_revenue || report.total_revenue) - (report.all_time_expense || report.total_expense)) >= 0 ? 'Laba Bersih (Semua Waktu)' : 'Rugi Bersih (Semua Waktu)'}
                   </p>
-                  <h3 className="text-2xl sm:text-3xl font-bold">{formatRupiah(Math.abs(report.net_profit))}</h3>
-                  <p className="text-xs text-white/70 mt-2">Bulan {MONTH_NAMES[reportMonth-1]} {reportYear}</p>
+                  <h3 className="text-2xl sm:text-3xl font-bold">{formatRupiah(Math.abs((report.all_time_revenue || report.total_revenue) - (report.all_time_expense || report.total_expense)))}</h3>
+                  <p className="text-xs text-white/70 mt-2">
+                    Bulan ini: {formatRupiah(report.net_profit)} ({MONTH_NAMES[reportMonth-1]} {reportYear})
+                  </p>
                 </div>
                 <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
                   <Wallet className="w-6 h-6 text-white" />
