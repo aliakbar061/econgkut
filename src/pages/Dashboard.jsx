@@ -12,6 +12,7 @@ const Dashboard = () => {
   const { user, logout, axiosInstance } = useContext(AuthContext);
   const navigate = useNavigate();
   const isStaff = user?.role === 'staff' || user?.role === 'admin';
+  const shouldRedirectToAdmin = user?.role === 'admin' || user?.position === 'Pimpinan';
 
   const getAdminDashboardSubtitle = () => {
     if (user?.role === 'admin') return 'Kelola pemesanan, staff, dan laporan absensi';
@@ -29,13 +30,22 @@ const Dashboard = () => {
   const [loadingAttendance, setLoadingAttendance] = useState(true);
 
   useEffect(() => {
+    if (shouldRedirectToAdmin) {
+      navigate('/admin');
+      return;
+    }
+
     if (!isStaff) {
       seedData();
       fetchRecentBookings();
     } else {
       fetchRecentAttendance();
     }
-  }, []);
+  }, [user, navigate, isStaff, shouldRedirectToAdmin]);
+
+  if (shouldRedirectToAdmin) {
+    return null; // Don't render the dashboard while redirecting
+  }
 
   const seedData = async () => {
     try { await axiosInstance.post('/seed-data'); } catch (e) {}
