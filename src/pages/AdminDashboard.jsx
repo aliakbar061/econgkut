@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import UserMenu from '@/components/ui/UserMenu';
 import * as XLSX from 'xlsx';
 
-const DIVISIONS = ['Operasional', 'Keuangan', 'IT', 'SDM', 'Pemasaran', 'Logistik', 'Umum'];
+const DIVISIONS = ['Divisi SDM & IT', 'Divisi Keuangan', 'Divisi Operasional & Pengolahan'];
 const POSITIONS = ['Staff', 'Kepala Divisi'];
 const ROLES = ['user', 'staff', 'admin'];
 
@@ -130,16 +130,16 @@ const AdminDashboard = () => {
       "Sakit": item.status === "Sakit" ? "✓" : "",
       "Terlambat": item.status === "Terlambat" ? "✓" : "",
       "Alpha": item.status === "Alpha" ? "✓" : "",
-      "Jam Masuk": item.time || '-',
+      "Jam": item.time || '-',
     }));
 
     const ws = XLSX.utils.aoa_to_sheet([]);
     XLSX.utils.sheet_add_aoa(ws, [
       ["Laporan Evaluasi Bulanan Karyawan"],
       ["PT. ECOngkut Lestari Nusantara"],
-      [`Bulan: ${MONTH_NAMES[reportMonth - 1]}`, "", `Tahun: ${reportYear}`],
+      [`Bulan: ${MONTH_NAMES[reportMonth - 1]}    Tahun: ${reportYear}`],
       [],
-      ["tgl", "Nama", "Divisi", "Hadir", "Izin", "Sakit", "Terlambat", "Alpha", "Jam Masuk"]
+      ["tgl", "Nama", "Divisi", "Hadir", "Izin", "Sakit", "Terlambat", "Alpha", "Jam"]
     ], { origin: "A1" });
 
     // Merge title cells
@@ -441,7 +441,7 @@ const AdminDashboard = () => {
               </div>
             ) : (
               <div className="overflow-x-auto rounded-xl border border-gray-200">
-                <table className="w-full text-sm">
+                <table className="w-full text-sm whitespace-nowrap">
                   <thead>
                     <tr className="bg-green-700 text-white text-center">
                       <th className="px-3 py-3 font-semibold text-left">Tgl</th>
