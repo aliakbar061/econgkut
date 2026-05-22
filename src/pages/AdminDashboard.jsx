@@ -369,7 +369,7 @@ const AdminDashboard = () => {
                           <Select
                             value={u.role || 'user'}
                             onValueChange={(v) => updateUser(u.id, 'role', v)}
-                            disabled={updatingUserId === u.id || (user?.role !== 'admin' && (!['Pimpinan', 'Kepala'].includes(user?.position) || u.role === 'admin'))}
+                            disabled={updatingUserId === u.id || (user?.role !== 'admin' && (!['Pimpinan', 'Kepala', 'Kepala Divisi'].includes(user?.position) || u.role === 'admin'))}
                           >
                             <SelectTrigger className="w-28 h-8 text-xs border-gray-300">
                               <SelectValue />
