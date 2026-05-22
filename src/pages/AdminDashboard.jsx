@@ -8,8 +8,8 @@ import { toast } from 'sonner';
 import UserMenu from '@/components/ui/UserMenu';
 import * as XLSX from 'xlsx';
 
-const DIVISIONS = ['Divisi SDM & IT', 'Divisi Keuangan', 'Divisi Operasional & Pengolahan'];
-const POSITIONS = ['Staff', 'Kepala Divisi'];
+const DIVISIONS = ['SDM & IT', 'Keuangan', 'Operasional & Pengolahan'];
+const POSITIONS = ['Pimpinan', 'Kepala', 'Staff', 'Anggota'];
 const ROLES = ['user', 'staff', 'admin'];
 
 const MONTH_NAMES = [

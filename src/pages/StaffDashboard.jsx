@@ -42,7 +42,7 @@ const StaffDashboard = () => {
   const [reportMonth, setReportMonth] = useState(new Date().getMonth() + 1);
   const [reportYear, setReportYear] = useState(new Date().getFullYear());
 
-  const isHead = user?.position === 'Kepala Divisi' || user?.role === 'admin';
+  const isHead = user?.position === 'Kepala' || user?.position === 'Pimpinan' || user?.role === 'admin';
 
   useEffect(() => {
     fetchMyAttendance();
