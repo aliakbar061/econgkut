@@ -45,18 +45,18 @@ const AdminDashboard = () => {
     if (!user) { navigate('/'); return; }
     
     // RBAC check
-    const isAuthorized = user.role === 'admin' || ['SDM & IT', 'Operasional & Pengolahan'].includes(user.division);
+    const isAuthorized = user.role === 'admin' || ['SDM', 'IT', 'SDM & IT', 'Operasional', 'Pengolahan', 'Operasional & Pengolahan'].includes(user.division);
     if (!isAuthorized) {
       toast.error('Akses ditolak. Anda tidak memiliki akses ke halaman ini.');
       navigate('/dashboard');
       return;
     }
 
-    if (user.role !== 'admin' && user.division === 'SDM & IT' && activeTab === 'bookings') {
+    if (user.role !== 'admin' && ['SDM', 'IT', 'SDM & IT'].includes(user.division) && activeTab === 'bookings') {
       setActiveTab('attendance');
     }
 
-    if (user.role === 'admin' || user.division === 'Operasional & Pengolahan') {
+    if (user.role === 'admin' || ['Operasional', 'Pengolahan', 'Operasional & Pengolahan'].includes(user.division)) {
       fetchStats();
       fetchAllBookings();
     }
@@ -237,9 +237,9 @@ const AdminDashboard = () => {
         {/* Tab Navigation */}
         <div className="flex space-x-2 mb-6 border-b border-gray-200">
           {[
-            { id: 'bookings', label: 'Pemesanan', icon: ClipboardList, allowed: user?.role === 'admin' || user?.division === 'Operasional & Pengolahan' },
-            { id: 'staff', label: 'Manajemen Staff', icon: Users, allowed: user?.role === 'admin' || user?.division === 'SDM & IT' },
-            { id: 'attendance', label: 'Laporan Absensi', icon: BarChart3, allowed: user?.role === 'admin' || user?.division === 'SDM & IT' },
+            { id: 'bookings', label: 'Pemesanan', icon: ClipboardList, allowed: user?.role === 'admin' || ['Operasional', 'Pengolahan', 'Operasional & Pengolahan'].includes(user?.division) },
+            { id: 'staff', label: 'Manajemen Staff', icon: Users, allowed: user?.role === 'admin' || ['SDM', 'IT', 'SDM & IT'].includes(user?.division) },
+            { id: 'attendance', label: 'Laporan Absensi', icon: BarChart3, allowed: user?.role === 'admin' || ['SDM', 'IT', 'SDM & IT'].includes(user?.division) },
           ].filter(t => t.allowed).map(({ id, label, icon: Icon }) => (
             <button
               key={id}
