@@ -58,8 +58,8 @@ const FinanceDashboard = () => {
     try {
       setLoading(true);
       const [reportRes, transRes] = await Promise.all([
-        axiosInstance.get(`/finance/report?month=${reportMonth}&year=${reportYear}`),
-        axiosInstance.get('/finance/transactions')
+        axiosInstance.get(`/finance/report?month=${reportMonth}&year=${reportYear}&_t=${Date.now()}`),
+        axiosInstance.get(`/finance/transactions?_t=${Date.now()}`)
       ]);
       
       setReport(reportRes.data);
