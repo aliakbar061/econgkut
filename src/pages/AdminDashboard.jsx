@@ -17,6 +17,9 @@ const MONTH_NAMES = [
   'Juli','Agustus','September','Oktober','November','Desember'
 ];
 
+const currentYear = new Date().getFullYear();
+const YEAR_OPTIONS = Array.from({ length: 5 }, (_, i) => currentYear - 1 + i);
+
 const AdminDashboard = () => {
   const { user, logout, axiosInstance } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -40,19 +43,29 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     if (!user) { navigate('/'); return; }
-    if (user.role !== 'admin') {
-      toast.error('Akses ditolak. Hanya admin yang bisa mengakses halaman ini.');
+    
+    // RBAC check
+    const isAuthorized = user.role === 'admin' || ['SDM', 'IT', 'Operasional', 'Pengolahan'].includes(user.division);
+    if (!isAuthorized) {
+      toast.error('Akses ditolak. Anda tidak memiliki akses ke halaman ini.');
       navigate('/dashboard');
       return;
     }
-    fetchStats();
-    fetchAllBookings();
+
+    if (user.role !== 'admin' && ['SDM', 'IT'].includes(user.division) && activeTab === 'bookings') {
+      setActiveTab('attendance');
+    }
+
+    if (user.role === 'admin' || ['Operasional', 'Pengolahan'].includes(user.division)) {
+      fetchStats();
+      fetchAllBookings();
+    }
   }, [user, navigate]);
 
   useEffect(() => {
     if (activeTab === 'staff') fetchAllUsers();
     if (activeTab === 'attendance') fetchAttendanceReport();
-  }, [activeTab]);
+  }, [activeTab, reportMonth, reportYear]);
 
   // ── Bookings ──────────────────────────────────────────────────────────────
   const fetchStats = async () => {
@@ -114,6 +127,16 @@ const AdminDashboard = () => {
     } catch (e) {
       toast.error('Gagal memuat laporan absensi');
     } finally { setLoadingReport(false); }
+  };
+
+  const updateAttendanceStatus = async (id, newStatus) => {
+    try {
+      await axiosInstance.patch(`/attendance/${id}`, { status: newStatus });
+      setAttendanceRecords(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r));
+      toast.success('Status absensi berhasil diperbarui');
+    } catch (e) {
+      toast.error('Gagal memperbarui status absensi');
+    }
   };
 
   const exportToExcel = () => {
@@ -195,9 +218,9 @@ const AdminDashboard = () => {
             {[
               { label: 'Total Pemesanan', value: stats.total_bookings, icon: Package, color: 'blue' },
               { label: 'Menunggu Konfirmasi', value: stats.pending_bookings, icon: Package, color: 'yellow' },
-              { label: 'Total Pendapatan', value: formatRupiah(stats.total_revenue), icon: DollarSign, color: 'green' },
+              { label: 'Total Pendapatan', value: formatRupiah(stats.total_revenue), icon: DollarSign, color: 'green', allowed: user?.role === 'admin' || user?.division === 'Keuangan' },
               { label: 'Sampah Terkumpul', value: `${stats.total_waste_collected.toFixed(1)} kg`, icon: Trash2, color: 'emerald' },
-            ].map(({ label, value, icon: Icon, color }) => (
+            ].filter(s => s.allowed !== false).map(({ label, value, icon: Icon, color }) => (
               <div key={label} className="p-6 bg-white rounded-2xl shadow-lg border border-green-100">
                 <div className="flex items-center justify-between mb-4">
                   <div className={`w-12 h-12 bg-${color}-100 rounded-xl flex items-center justify-center`}>
@@ -214,10 +237,10 @@ const AdminDashboard = () => {
         {/* Tab Navigation */}
         <div className="flex space-x-2 mb-6 border-b border-gray-200">
           {[
-            { id: 'bookings', label: 'Pemesanan', icon: ClipboardList },
-            { id: 'staff', label: 'Manajemen Staff', icon: Users },
-            { id: 'attendance', label: 'Laporan Absensi', icon: BarChart3 },
-          ].map(({ id, label, icon: Icon }) => (
+            { id: 'bookings', label: 'Pemesanan', icon: ClipboardList, allowed: user?.role === 'admin' || ['Operasional', 'Pengolahan'].includes(user?.division) },
+            { id: 'staff', label: 'Manajemen Staff', icon: Users, allowed: user?.role === 'admin' || ['SDM', 'IT'].includes(user?.division) },
+            { id: 'attendance', label: 'Laporan Absensi', icon: BarChart3, allowed: user?.role === 'admin' || ['SDM', 'IT'].includes(user?.division) },
+          ].filter(t => t.allowed).map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
@@ -346,7 +369,7 @@ const AdminDashboard = () => {
                           <Select
                             value={u.role || 'user'}
                             onValueChange={(v) => updateUser(u.id, 'role', v)}
-                            disabled={updatingUserId === u.id}
+                            disabled={updatingUserId === u.id || (user?.role !== 'admin' && user?.position !== 'Kepala Divisi')}
                           >
                             <SelectTrigger className="w-28 h-8 text-xs border-gray-300">
                               <SelectValue />
@@ -414,11 +437,8 @@ const AdminDashboard = () => {
                   value={reportYear}
                   onChange={(e) => setReportYear(Number(e.target.value))}
                 >
-                  {[2024, 2025, 2026, 2027].map(y => <option key={y} value={y}>{y}</option>)}
+                  {YEAR_OPTIONS.map(y => <option key={y} value={y}>{y}</option>)}
                 </select>
-                <Button onClick={fetchAttendanceReport} variant="outline" className="border-green-600 text-green-700 hover:bg-green-50 text-sm">
-                  Tampilkan
-                </Button>
                 <Button onClick={exportToExcel} className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm flex items-center gap-2">
                   <Download className="w-4 h-4" /> Ekspor Excel
                 </Button>
@@ -447,11 +467,7 @@ const AdminDashboard = () => {
                       <th className="px-3 py-3 font-semibold text-left">Tgl</th>
                       <th className="px-3 py-3 font-semibold text-left">Nama</th>
                       <th className="px-3 py-3 font-semibold text-left">Divisi</th>
-                      <th className="px-3 py-3 font-semibold">Hadir</th>
-                      <th className="px-3 py-3 font-semibold">Izin</th>
-                      <th className="px-3 py-3 font-semibold">Sakit</th>
-                      <th className="px-3 py-3 font-semibold">Terlambat</th>
-                      <th className="px-3 py-3 font-semibold">Alpha</th>
+                      <th className="px-3 py-3 font-semibold text-center">Status Kehadiran</th>
                       <th className="px-3 py-3 font-semibold text-left">Jam</th>
                     </tr>
                   </thead>
@@ -461,15 +477,18 @@ const AdminDashboard = () => {
                         <td className="px-3 py-3 font-mono font-semibold text-gray-700">{rec.date.split('-')[2]}</td>
                         <td className="px-3 py-3 font-medium text-gray-800">{rec.user_name}</td>
                         <td className="px-3 py-3 text-gray-600">{rec.division || '-'}</td>
-                        {['Hadir', 'Izin', 'Sakit', 'Terlambat', 'Alpha'].map(s => (
-                          <td key={s} className="px-3 py-4 text-center align-middle">
-                            {rec.status === s ? (
-                              <div className="flex justify-center">
-                                <span className={`inline-flex w-6 h-6 rounded-full text-xs font-bold items-center justify-center ${attendanceStatusColor[s] || 'bg-yellow-100 text-yellow-600'}`}>✓</span>
-                              </div>
-                            ) : ''}
-                          </td>
-                        ))}
+                        <td className="px-3 py-4 text-center align-middle">
+                          <Select value={rec.status} onValueChange={(v) => updateAttendanceStatus(rec.id, v)}>
+                            <SelectTrigger className={`w-28 h-8 text-xs font-bold border-0 mx-auto ${attendanceStatusColor[rec.status] || 'bg-gray-100 text-gray-700'}`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {['Hadir', 'Izin', 'Sakit', 'Terlambat', 'Alpha'].map(s => (
+                                <SelectItem key={s} value={s}>{s}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </td>
                         <td className="px-3 py-4 text-gray-600 font-mono text-xs">{rec.time || '-'}</td>
                       </tr>
                     ))}
