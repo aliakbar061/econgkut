@@ -35,7 +35,7 @@ const StaffDashboard = () => {
   const [submitting, setSubmitting] = useState(false);
 
   // Location state
-  const [location, setLocation] = useState(null);          // { lat, lng, address, detail }
+  const [location, setLocation] = useState(null);
   const [gettingLocation, setGettingLocation] = useState(false);
 
   // Export state
@@ -70,7 +70,6 @@ const StaffDashboard = () => {
       const data = await res.json();
       const addr = data.address || {};
 
-      // Susun alamat detail
       const parts = [
         addr.road || addr.pedestrian || addr.footway || addr.path,
         addr.village || addr.suburb || addr.neighbourhood,
@@ -132,8 +131,7 @@ const StaffDashboard = () => {
       return;
     }
 
-    // Cek apakah sudah absen hari ini
-    const today = new Date().toLocaleDateString('sv-SE'); // YYYY-MM-DD format
+    const today = new Date().toLocaleDateString('sv-SE');
     const alreadyAbsen = history.some(h => h.date === today);
     if (alreadyAbsen) {
       toast.warning('Anda sudah melakukan absensi hari ini.');
@@ -171,32 +169,26 @@ const StaffDashboard = () => {
         "tgl": item.date.split('-')[2],
         "Nama": item.user_name,
         "Divisi": item.division || '-',
-        "Hadir": item.status === 'Hadir' ? '✓' : '',
-        "Izin": item.status === 'Izin' ? '✓' : '',
-        "Sakit": item.status === 'Sakit' ? '✓' : '',
-        "Terlambat": item.status === 'Terlambat' ? '✓' : '',
-        "Alpha": item.status === 'Alpha' ? '✓' : '',
+        "Status Kehadiran": item.status,
         "Jam": item.time || '-',
         "Lokasi": item.location?.address || (item.location ? `${item.location.lat?.toFixed(4)}, ${item.location.lng?.toFixed(4)}` : '-'),
       }));
 
       const ws = XLSX.utils.aoa_to_sheet([]);
       XLSX.utils.sheet_add_aoa(ws, [
-        ['Laporan Evaluasi Bulanan Karyawan'],
+        ['Laporan Absensi Bulanan Karyawan'],
         ['PT. ECOngkut Lestari Nusantara'],
-        [`Bulan: ${MONTH_NAMES[reportMonth - 1]}`, '', '', `Tahun: ${reportYear}`],
+        ['Bulan:', MONTH_NAMES[reportMonth - 1] || reportMonth, '', 'Tahun:', reportYear],
         [],
-        ['tgl', 'Nama', 'Divisi', 'Hadir', 'Izin', 'Sakit', 'Terlambat', 'Alpha', 'Jam', 'Lokasi'],
+        ['tgl', 'Nama', 'Divisi', 'Status Kehadiran', 'Jam', 'Lokasi'],
       ], { origin: 'A1' });
 
       ws['!merges'] = [
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 9 } },
-        { s: { r: 1, c: 0 }, e: { r: 1, c: 9 } },
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } },
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 5 } },
       ];
       ws['!cols'] = [
-        { wch: 5 }, { wch: 25 }, { wch: 15 },
-        { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 12 }, { wch: 8 },
-        { wch: 10 }, { wch: 45 },
+        { wch: 5 }, { wch: 25 }, { wch: 15 }, { wch: 18 }, { wch: 10 }, { wch: 45 },
       ];
 
       XLSX.utils.sheet_add_json(ws, rows, { origin: 'A6', skipHeader: true });
@@ -218,15 +210,15 @@ const StaffDashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-emerald-50 to-green-100">
 
-      {/* Nav */}
-      <nav className="bg-white border-b border-teal-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center">
-              <Truck className="w-6 h-6 text-white" />
+      {/* ── Nav ── */}
+      <nav className="bg-white border-b border-teal-100 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-teal-600 rounded-full flex items-center justify-center flex-shrink-0">
+              <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
-            <div className="hidden sm:block">
-              <p className="font-bold text-teal-900 leading-none">ECOngkut</p>
+            <div className="hidden xs:block sm:block">
+              <p className="font-bold text-teal-900 leading-none text-sm sm:text-base">ECOngkut</p>
               <p className="text-xs text-teal-600">Portal Absensi Staff</p>
             </div>
           </div>
@@ -234,39 +226,46 @@ const StaffDashboard = () => {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      {/* ── Main Content ── */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
 
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-teal-900 mb-1">Portal Absensi</h1>
-          <p className="text-gray-500">
-            Divisi: <span className="font-semibold text-teal-700">{user?.division || 'Umum'}</span>
-            &nbsp;·&nbsp;
-            Posisi: <span className="font-semibold text-teal-700">{user?.position || 'Staff'}</span>
+        <div className="mb-5 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-teal-900 mb-1">Portal Absensi</h1>
+          <p className="text-sm sm:text-base text-gray-500 flex flex-wrap gap-1">
+            <span>Divisi: <span className="font-semibold text-teal-700">{user?.division || 'Umum'}</span></span>
+            <span className="text-gray-300 hidden sm:inline">·</span>
+            <span>Posisi: <span className="font-semibold text-teal-700">{user?.position || 'Staff'}</span></span>
           </p>
         </div>
 
-        {/* Status Hari Ini */}
+        {/* Status Hari Ini Banner */}
         {sudahAbsenHariIni && todayRecord && (
-          <div className={`mb-6 p-4 rounded-xl border flex items-center gap-3 ${attendanceBadge[todayRecord.status]?.color || 'bg-gray-100'}`}>
-            <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-            <div>
-              <p className="font-semibold">Anda sudah absen hari ini — <span className="uppercase">{todayRecord.status}</span></p>
-              <p className="text-sm opacity-80">Jam {todayRecord.time} · {todayRecord.location?.address || 'Tanpa lokasi'}</p>
+          <div className={`mb-5 sm:mb-6 p-3 sm:p-4 rounded-xl border flex items-start sm:items-center gap-3 ${attendanceBadge[todayRecord.status]?.color || 'bg-gray-100'}`}>
+            <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5 sm:mt-0" />
+            <div className="min-w-0">
+              <p className="font-semibold text-sm sm:text-base">
+                Sudah absen hari ini —&nbsp;
+                <span className="uppercase">{todayRecord.status}</span>
+              </p>
+              <p className="text-xs sm:text-sm opacity-80 truncate">
+                Jam {todayRecord.time} · {todayRecord.location?.address || 'Tanpa lokasi'}
+              </p>
             </div>
           </div>
         )}
 
-        <div className="grid lg:grid-cols-2 gap-8">
+        {/* ── Grid Utama: Form + Panel Kanan ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-8">
 
           {/* ── FORM ABSENSI ── */}
-          <div className="bg-white rounded-2xl shadow-lg border border-teal-100 p-6">
-            <h2 className="text-xl font-bold text-teal-900 mb-5 flex items-center gap-2">
-              <ClipboardCheck className="w-5 h-5 text-teal-600" />
+          <div className="bg-white rounded-2xl shadow-lg border border-teal-100 p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-bold text-teal-900 mb-4 sm:mb-5 flex items-center gap-2">
+              <ClipboardCheck className="w-5 h-5 text-teal-600 flex-shrink-0" />
               Catat Kehadiran Hari Ini
             </h2>
 
-            <div className="space-y-5">
+            <div className="space-y-4 sm:space-y-5">
 
               {/* Pilih Status */}
               <div>
@@ -276,7 +275,7 @@ const StaffDashboard = () => {
                     <button
                       key={s}
                       onClick={() => setStatus(s)}
-                      className={`py-2.5 rounded-xl text-sm font-semibold border-2 transition-all ${
+                      className={`py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold border-2 transition-all ${
                         status === s
                           ? s === 'Hadir'
                             ? 'border-teal-500 bg-teal-500 text-white'
@@ -290,25 +289,25 @@ const StaffDashboard = () => {
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-gray-400 mt-2">
-                  * Status <span className="font-semibold">Terlambat</span> akan ditentukan otomatis oleh sistem jika absen Hadir setelah pukul 08:00 WITA
+                <p className="text-xs text-gray-400 mt-2 leading-snug">
+                  * Status <span className="font-semibold">Terlambat</span> ditentukan otomatis jika absen Hadir setelah pukul 08:00 WITA
                 </p>
               </div>
 
-              {/* Lokasi — wajib untuk Hadir */}
+              {/* Lokasi */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Lokasi Saat Ini {status === 'Hadir' && <span className="text-red-500">*</span>}
                 </label>
 
                 {location ? (
-                  <div className="p-4 bg-teal-50 border border-teal-200 rounded-xl space-y-3">
+                  <div className="p-3 sm:p-4 bg-teal-50 border border-teal-200 rounded-xl space-y-2 sm:space-y-3">
                     <div className="flex items-start gap-2">
                       <MapPin className="w-4 h-4 text-teal-600 mt-0.5 flex-shrink-0" />
-                      <p className="text-sm font-medium text-teal-800">{location.address}</p>
+                      <p className="text-xs sm:text-sm font-medium text-teal-800 leading-snug">{location.address}</p>
                     </div>
                     {location.detail && (
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-teal-700 border-t border-teal-200 pt-3">
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs text-teal-700 border-t border-teal-200 pt-2 sm:pt-3">
                         <div><span className="text-teal-400">Jalan</span><br />{location.detail.jalan}</div>
                         <div><span className="text-teal-400">Kelurahan</span><br />{location.detail.kelurahan}</div>
                         <div><span className="text-teal-400">Kecamatan</span><br />{location.detail.kecamatan}</div>
@@ -318,8 +317,8 @@ const StaffDashboard = () => {
                       </div>
                     )}
                     <div className="flex items-center gap-2 text-xs text-teal-600 border-t border-teal-200 pt-2">
-                      <span className="font-mono">{location.lat.toFixed(6)}, {location.lng.toFixed(6)}</span>
-                      <button onClick={getLocation} className="ml-auto text-teal-500 hover:text-teal-700 underline">
+                      <span className="font-mono truncate">{location.lat.toFixed(6)}, {location.lng.toFixed(6)}</span>
+                      <button onClick={getLocation} className="ml-auto flex-shrink-0 text-teal-500 hover:text-teal-700 underline whitespace-nowrap">
                         Perbarui
                       </button>
                     </div>
@@ -328,7 +327,7 @@ const StaffDashboard = () => {
                   <button
                     onClick={getLocation}
                     disabled={gettingLocation}
-                    className="w-full py-4 border-2 border-dashed border-teal-300 rounded-xl text-teal-600 hover:border-teal-400 hover:bg-teal-50 transition-all flex items-center justify-center gap-2 font-medium"
+                    className="w-full py-4 sm:py-5 border-2 border-dashed border-teal-300 rounded-xl text-teal-600 hover:border-teal-400 hover:bg-teal-50 transition-all flex items-center justify-center gap-2 font-medium text-sm disabled:opacity-60"
                   >
                     {gettingLocation ? (
                       <>
@@ -349,7 +348,7 @@ const StaffDashboard = () => {
               <Button
                 onClick={submitAttendance}
                 disabled={submitting || sudahAbsenHariIni}
-                className={`w-full py-3 text-base font-semibold rounded-xl transition-all ${
+                className={`w-full py-3 text-sm sm:text-base font-semibold rounded-xl transition-all ${
                   sudahAbsenHariIni
                     ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                     : 'bg-teal-600 hover:bg-teal-700 text-white'
@@ -370,18 +369,18 @@ const StaffDashboard = () => {
           </div>
 
           {/* ── PANEL KANAN ── */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
 
             {/* Ekspor — Kepala Divisi & Admin */}
             {isHead && (
-              <div className="bg-white rounded-2xl shadow-lg border border-emerald-100 p-6 border-l-4 border-l-emerald-500">
-                <h2 className="text-lg font-bold text-emerald-900 mb-4 flex items-center gap-2">
-                  <Download className="w-5 h-5 text-emerald-600" />
+              <div className="bg-white rounded-2xl shadow-lg border border-emerald-100 p-4 sm:p-6 border-l-4 border-l-emerald-500">
+                <h2 className="text-base sm:text-lg font-bold text-emerald-900 mb-3 sm:mb-4 flex items-center gap-2">
+                  <Download className="w-5 h-5 text-emerald-600 flex-shrink-0" />
                   Ekspor Laporan Bulanan
                 </h2>
-                <div className="flex gap-2 mb-4">
+                <div className="flex gap-2 mb-3 sm:mb-4">
                   <select
-                    className="flex-1 border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400"
+                    className="flex-1 min-w-0 border border-gray-300 rounded-lg p-2 text-xs sm:text-sm focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400"
                     value={reportMonth}
                     onChange={(e) => setReportMonth(Number(e.target.value))}
                   >
@@ -390,7 +389,7 @@ const StaffDashboard = () => {
                     ))}
                   </select>
                   <select
-                    className="w-28 border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-400"
+                    className="w-20 sm:w-28 border border-gray-300 rounded-lg p-2 text-xs sm:text-sm focus:ring-2 focus:ring-emerald-400"
                     value={reportYear}
                     onChange={(e) => setReportYear(Number(e.target.value))}
                   >
@@ -401,7 +400,7 @@ const StaffDashboard = () => {
                 </div>
                 <Button
                   onClick={exportToExcel}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2 text-sm"
                 >
                   <Download className="w-4 h-4" /> Ekspor ke Excel (.xlsx)
                 </Button>
@@ -409,38 +408,39 @@ const StaffDashboard = () => {
             )}
 
             {/* Riwayat Absensi Pribadi */}
-            <div className="bg-white rounded-2xl shadow-lg border border-teal-100 p-6 flex flex-col" style={{ maxHeight: '520px' }}>
-              <h2 className="text-lg font-bold text-teal-900 mb-4 flex items-center gap-2 flex-shrink-0">
-                <History className="w-5 h-5 text-teal-600" />
+            <div className="bg-white rounded-2xl shadow-lg border border-teal-100 p-4 sm:p-6 flex flex-col"
+              style={{ maxHeight: isHead ? '380px' : '520px' }}>
+              <h2 className="text-base sm:text-lg font-bold text-teal-900 mb-3 sm:mb-4 flex items-center gap-2 flex-shrink-0">
+                <History className="w-5 h-5 text-teal-600 flex-shrink-0" />
                 Riwayat Absensi Saya
               </h2>
-              <div className="overflow-y-auto flex-1 space-y-3 pr-1">
+              <div className="overflow-y-auto flex-1 space-y-2 sm:space-y-3 pr-1">
                 {loadingHistory ? (
                   <div className="text-center py-8 text-gray-500">
-                    <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-teal-400" />
+                    <Loader2 className="w-7 h-7 sm:w-8 sm:h-8 animate-spin mx-auto mb-2 text-teal-400" />
                     <p className="text-sm">Memuat...</p>
                   </div>
                 ) : history.length === 0 ? (
                   <div className="text-center py-8">
-                    <ClipboardCheck className="w-12 h-12 text-gray-200 mx-auto mb-2" />
+                    <ClipboardCheck className="w-10 h-10 sm:w-12 sm:h-12 text-gray-200 mx-auto mb-2" />
                     <p className="text-gray-400 text-sm">Belum ada riwayat absensi.</p>
                   </div>
                 ) : (
                   history.map((item) => {
                     const badge = attendanceBadge[item.status] || { color: 'bg-gray-100 text-gray-700', dot: 'bg-gray-400' };
                     return (
-                      <div key={item.id} className="p-3 rounded-xl border border-gray-100 hover:border-teal-200 hover:bg-teal-50 transition-all">
+                      <div key={item.id} className="p-2.5 sm:p-3 rounded-xl border border-gray-100 hover:border-teal-200 hover:bg-teal-50 transition-all">
                         <div className="flex justify-between items-start gap-2">
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-semibold text-gray-800 text-sm">{item.date}</span>
-                              <span className="text-gray-300">·</span>
+                            <div className="flex items-center gap-1.5 sm:gap-2 mb-1 flex-wrap">
+                              <span className="font-semibold text-gray-800 text-xs sm:text-sm">{item.date}</span>
+                              <span className="text-gray-300 hidden sm:inline">·</span>
                               <span className="text-xs text-gray-500 font-mono">{item.time}</span>
                             </div>
                             {item.location?.address ? (
                               <p className="text-xs text-gray-500 flex items-start gap-1 leading-snug">
                                 <MapPin className="w-3 h-3 text-teal-400 flex-shrink-0 mt-0.5" />
-                                <span className="truncate">{item.location.address}</span>
+                                <span className="line-clamp-2">{item.location.address}</span>
                               </p>
                             ) : item.location ? (
                               <p className="text-xs text-gray-400 flex items-center gap-1">
@@ -451,7 +451,7 @@ const StaffDashboard = () => {
                               <p className="text-xs text-gray-300">Tanpa lokasi</p>
                             )}
                           </div>
-                          <span className={`flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border ${badge.color}`}>
+                          <span className={`flex-shrink-0 flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-xs font-bold border ${badge.color}`}>
                             <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`}></span>
                             {item.status}
                           </span>
