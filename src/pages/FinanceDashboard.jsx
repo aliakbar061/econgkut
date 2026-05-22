@@ -4,9 +4,10 @@ import { AuthContext } from '@/App';
 import UserMenu from '@/components/ui/UserMenu';
 import { Button } from '@/components/ui/button';
 import {
-  Banknote, TrendingUp, TrendingDown, Wallet, Calendar, Plus, Trash2, ArrowLeft, Loader2
+  Banknote, TrendingUp, TrendingDown, Wallet, Calendar, Plus, Trash2, ArrowLeft, Loader2, Download
 } from 'lucide-react';
 import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
 
 const FinanceDashboard = () => {
   const { user, logout, axiosInstance } = useContext(AuthContext);
@@ -22,6 +23,8 @@ const FinanceDashboard = () => {
   // Form State
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [displayAmount, setDisplayAmount] = useState('');
+  const [isCustomCategory, setIsCustomCategory] = useState(false);
   const [formData, setFormData] = useState({
     type: 'expense',
     category: 'Gaji Karyawan',
@@ -76,10 +79,26 @@ const FinanceDashboard = () => {
     }
   };
 
+  const handleAmountChange = (e) => {
+    const rawValue = e.target.value.replace(/\D/g, ''); // strip non-digits
+    if (!rawValue) {
+      setFormData({ ...formData, amount: '' });
+      setDisplayAmount('');
+      return;
+    }
+    const formatted = new Intl.NumberFormat('id-ID').format(rawValue);
+    setFormData({ ...formData, amount: rawValue });
+    setDisplayAmount(formatted);
+  };
+
   const handleCreateTransaction = async (e) => {
     e.preventDefault();
     if (!formData.amount || formData.amount <= 0) {
       toast.error('Nominal tidak valid');
+      return;
+    }
+    if (!formData.category || formData.category.trim() === '') {
+      toast.error('Kategori tidak boleh kosong');
       return;
     }
     
@@ -96,6 +115,8 @@ const FinanceDashboard = () => {
         amount: '',
         notes: ''
       });
+      setDisplayAmount('');
+      setIsCustomCategory(false);
       fetchData();
     } catch (err) {
       toast.error('Gagal menyimpan pencatatan');
@@ -113,6 +134,50 @@ const FinanceDashboard = () => {
     } catch (err) {
       toast.error('Gagal menghapus catatan');
     }
+  };
+
+  const exportToExcel = () => {
+    if (!report) return;
+
+    const wsData = [
+      ['Laporan Laba Rugi Keuangan'],
+      ['PT. ECOngkut Lestari Nusantara'],
+      ['Bulan:', MONTH_NAMES[reportMonth - 1], 'Tahun:', reportYear],
+      [],
+      ['Ringkasan Laba Rugi (Bulan Ini)'],
+      ['Total Pendapatan', report.total_revenue],
+      ['Total Pengeluaran', report.total_expense],
+      ['Laba/Rugi Bersih', report.net_profit],
+      [],
+      ['Rincian Transaksi'],
+      ['Tanggal', 'Kategori', 'Tipe', 'Nominal (Rp)', 'Pencatat', 'Keterangan']
+    ];
+
+    transactions.forEach(t => {
+      wsData.push([
+        t.date,
+        t.category,
+        t.type === 'expense' ? 'Pengeluaran' : 'Pemasukan',
+        t.type === 'expense' ? -t.amount : t.amount,
+        t.user_name,
+        t.notes || '-'
+      ]);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws['!merges'] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 5 } },
+      { s: { r: 4, c: 0 }, e: { r: 4, c: 1 } }
+    ];
+    ws['!cols'] = [
+      { wch: 12 }, { wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 30 }
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Laporan Keuangan');
+    XLSX.writeFile(wb, `Laporan_Keuangan_${MONTH_NAMES[reportMonth-1]}_${reportYear}.xlsx`);
+    toast.success('Laporan berhasil diekspor!');
   };
 
   const formatRupiah = (amount) =>
@@ -160,8 +225,8 @@ const FinanceDashboard = () => {
             <p className="text-gray-500 text-sm sm:text-base">Ringkasan laba rugi dan pencatatan kas bulanan.</p>
           </div>
           
-          <div className="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm border border-green-100 w-full sm:w-auto">
-            <Calendar className="w-5 h-5 text-green-500 ml-2" />
+          <div className="flex flex-wrap items-center gap-2 bg-white p-2 rounded-xl shadow-sm border border-green-100 w-full sm:w-auto">
+            <Calendar className="w-5 h-5 text-green-500 ml-2 hidden sm:block" />
             <select
               className="bg-transparent border-none focus:ring-0 text-sm font-medium text-gray-700 cursor-pointer"
               value={reportMonth}
@@ -180,6 +245,16 @@ const FinanceDashboard = () => {
                 <option key={y} value={y}>{y}</option>
               ))}
             </select>
+            <Button
+              variant="outline"
+              onClick={exportToExcel}
+              className="border-green-600 text-green-700 hover:bg-green-50 ml-auto sm:ml-2 h-9 px-3"
+              disabled={loading || !report}
+            >
+              <Download className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Ekspor Excel</span>
+            </Button>
+          </div>
           </div>
         </div>
 
@@ -361,27 +436,58 @@ const FinanceDashboard = () => {
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-600 mb-1.5">Kategori</label>
-                  <select 
-                    className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-400 focus:bg-white transition-colors"
-                    value={formData.category}
-                    onChange={(e) => setFormData({...formData, category: e.target.value})}
-                  >
-                    {(formData.type === 'expense' ? EXPENSE_CATEGORIES : REVENUE_CATEGORIES).map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
+                  {!isCustomCategory ? (
+                    <select 
+                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-400 focus:bg-white transition-colors"
+                      value={formData.category}
+                      onChange={(e) => {
+                        if (e.target.value === 'ADD_NEW') {
+                          setIsCustomCategory(true);
+                          setFormData({...formData, category: ''});
+                        } else {
+                          setFormData({...formData, category: e.target.value});
+                        }
+                      }}
+                    >
+                      {(formData.type === 'expense' ? EXPENSE_CATEGORIES : REVENUE_CATEGORIES).map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                      <option value="ADD_NEW" className="font-semibold text-green-600">+ Tambah Kategori Baru</option>
+                    </select>
+                  ) : (
+                    <div className="flex gap-2">
+                      <input 
+                        type="text"
+                        placeholder="Ketik kategori baru..."
+                        required
+                        autoFocus
+                        className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-400 focus:bg-white transition-colors"
+                        value={formData.category}
+                        onChange={(e) => setFormData({...formData, category: e.target.value})}
+                      />
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setIsCustomCategory(false);
+                          setFormData({...formData, category: (formData.type === 'expense' ? EXPENSE_CATEGORIES[0] : REVENUE_CATEGORIES[0])});
+                        }}
+                        className="px-3 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300 text-sm font-semibold whitespace-nowrap"
+                      >
+                        Batal
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-600 mb-1.5">Nominal (Rp)</label>
                   <input 
-                    type="number" 
+                    type="text" 
                     required
-                    min="1"
-                    placeholder="Contoh: 50000"
+                    placeholder="Contoh: 5.000.000"
                     className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-400 focus:bg-white transition-colors"
-                    value={formData.amount}
-                    onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                    value={displayAmount}
+                    onChange={handleAmountChange}
                   />
                 </div>
 
