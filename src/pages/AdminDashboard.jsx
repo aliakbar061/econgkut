@@ -8,8 +8,8 @@ import { toast } from 'sonner';
 import UserMenu from '@/components/ui/UserMenu';
 import * as XLSX from 'xlsx';
 
-const DIVISIONS = ['SDM & IT', 'Keuangan', 'Operasional & Pengolahan'];
-const POSITIONS = ['Pimpinan', 'Kepala', 'Staff', 'Anggota'];
+const DIVISIONS = ['Operasional', 'Keuangan', 'IT', 'SDM', 'Pemasaran', 'Logistik', 'Umum'];
+const POSITIONS = ['Staff', 'Kepala Divisi'];
 const ROLES = ['user', 'staff', 'admin'];
 
 const MONTH_NAMES = [
@@ -137,7 +137,7 @@ const AdminDashboard = () => {
     XLSX.utils.sheet_add_aoa(ws, [
       ["Laporan Evaluasi Bulanan Karyawan"],
       ["PT. ECOngkut Lestari Nusantara"],
-      [`Bulan: ${MONTH_NAMES[reportMonth - 1]}    Tahun: ${reportYear}`],
+      [`Bulan: ${MONTH_NAMES[reportMonth - 1]}`, "", "", "", `Tahun: ${reportYear}`],
       [],
       ["tgl", "Nama", "Divisi", "Hadir", "Izin", "Sakit", "Terlambat", "Alpha", "Jam"]
     ], { origin: "A1" });
@@ -165,7 +165,7 @@ const AdminDashboard = () => {
   };
   const statusColor = { pending: 'bg-yellow-100 text-yellow-700', confirmed: 'bg-blue-100 text-blue-700', 'in-transit': 'bg-purple-100 text-purple-700', completed: 'bg-green-100 text-green-700', cancelled: 'bg-red-100 text-red-700' };
   const statusText = { pending: 'Menunggu', confirmed: 'Dikonfirmasi', 'in-transit': 'Dalam Perjalanan', completed: 'Selesai', cancelled: 'Dibatalkan' };
-  const attendanceStatusColor = { Hadir: 'bg-green-100 text-green-800', Terlambat: 'bg-yellow-100 text-yellow-800', Alpha: 'bg-red-100 text-red-800', Izin: 'bg-blue-100 text-blue-800', Sakit: 'bg-purple-100 text-purple-800' };
+  const attendanceStatusColor = { Hadir: 'bg-green-100 text-green-700', Terlambat: 'bg-yellow-100 text-yellow-600', Alpha: 'bg-red-100 text-red-700', Izin: 'bg-blue-100 text-blue-700', Sakit: 'bg-yellow-100 text-yellow-600' };
 
   // ── RENDER ─────────────────────────────────────────────────────────────────
   return (
@@ -426,10 +426,10 @@ const AdminDashboard = () => {
             </div>
 
             {/* Report Header Preview */}
-            <div className="mb-6 p-4 bg-emerald-50 rounded-xl border border-emerald-200 text-center">
-              <p className="font-bold text-emerald-900 text-lg">Laporan Evaluasi Bulanan Karyawan</p>
-              <p className="font-semibold text-emerald-800">PT. ECOngkut Lestari Nusantara</p>
-              <p className="text-emerald-700 text-sm mt-1">Bulan: {MONTH_NAMES[reportMonth - 1]} &nbsp;&nbsp; Tahun: {reportYear}</p>
+            <div className="mb-6 py-8 px-4 bg-[#f0fdf4] rounded-2xl border border-green-100 text-center shadow-sm">
+              <p className="font-bold text-[#064e3b] text-xl mb-1">Laporan Evaluasi Bulanan Karyawan</p>
+              <p className="font-medium text-[#065f46] text-lg mb-3">PT. ECOngkut Lestari Nusantara</p>
+              <p className="text-[#047857] text-sm font-medium">Bulan: {MONTH_NAMES[reportMonth - 1]} &nbsp;&nbsp;&nbsp; Tahun: {reportYear}</p>
             </div>
 
             {loadingReport ? (
@@ -441,7 +441,7 @@ const AdminDashboard = () => {
               </div>
             ) : (
               <div className="overflow-x-auto rounded-xl border border-gray-200">
-                <table className="w-full text-sm whitespace-nowrap">
+                <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-green-700 text-white text-center">
                       <th className="px-3 py-3 font-semibold text-left">Tgl</th>
@@ -462,13 +462,15 @@ const AdminDashboard = () => {
                         <td className="px-3 py-3 font-medium text-gray-800">{rec.user_name}</td>
                         <td className="px-3 py-3 text-gray-600">{rec.division || '-'}</td>
                         {['Hadir', 'Izin', 'Sakit', 'Terlambat', 'Alpha'].map(s => (
-                          <td key={s} className="px-3 py-3 text-center">
+                          <td key={s} className="px-3 py-4 text-center align-middle">
                             {rec.status === s ? (
-                              <span className={`inline-block w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center ${attendanceStatusColor[s]}`}>✓</span>
+                              <div className="flex justify-center">
+                                <span className={`inline-flex w-6 h-6 rounded-full text-xs font-bold items-center justify-center ${attendanceStatusColor[s] || 'bg-yellow-100 text-yellow-600'}`}>✓</span>
+                              </div>
                             ) : ''}
                           </td>
                         ))}
-                        <td className="px-3 py-3 text-gray-600 font-mono text-xs">{rec.time || '-'}</td>
+                        <td className="px-3 py-4 text-gray-600 font-mono text-xs">{rec.time || '-'}</td>
                       </tr>
                     ))}
                   </tbody>
