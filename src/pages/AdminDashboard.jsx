@@ -153,6 +153,28 @@ const AdminDashboard = () => {
     }
   };
 
+  const deleteAttendance = async (attId) => {
+    if (!window.confirm('Hapus laporan absensi ini?')) return;
+    try {
+      await axiosInstance.delete(`/attendance/${attId}`);
+      setAttendanceRecords(prev => prev.filter(r => r.id !== attId));
+      toast.success('Laporan berhasil dihapus');
+    } catch (e) {
+      toast.error('Gagal menghapus laporan');
+    }
+  };
+
+  const deleteAllAttendance = async () => {
+    if (!window.confirm('PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA data absensi? Tindakan ini tidak dapat dibatalkan.')) return;
+    try {
+      await axiosInstance.delete(`/attendance/report/all`);
+      setAttendanceRecords([]);
+      toast.success('Semua laporan absensi berhasil dihapus');
+    } catch (e) {
+      toast.error('Gagal menghapus semua laporan');
+    }
+  };
+
   const exportToExcel = () => {
     if (attendanceRecords.length === 0) {
       toast.warning('Tidak ada data untuk diekspor');
@@ -519,7 +541,10 @@ const AdminDashboard = () => {
                 >
                   {YEAR_OPTIONS.map(y => <option key={y} value={y}>{y}</option>)}
                 </select>
-                <Button onClick={exportToExcel} className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm flex items-center gap-2">
+                <Button onClick={deleteAllAttendance} variant="outline" className="border-red-500 text-red-600 hover:bg-red-50 text-sm flex items-center gap-2 h-9">
+                  <Trash2 className="w-4 h-4" /> Hapus Semua
+                </Button>
+                <Button onClick={exportToExcel} className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm flex items-center gap-2 h-9">
                   <Download className="w-4 h-4" /> Ekspor Excel
                 </Button>
               </div>
@@ -549,6 +574,7 @@ const AdminDashboard = () => {
                       <th className="px-3 py-3 font-semibold text-left">Divisi</th>
                       <th className="px-3 py-3 font-semibold text-center">Status Kehadiran</th>
                       <th className="px-3 py-3 font-semibold text-left">Jam</th>
+                      <th className="px-3 py-3 font-semibold text-center">Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -570,6 +596,17 @@ const AdminDashboard = () => {
                           </Select>
                         </td>
                         <td className="px-3 py-4 text-gray-600 font-mono text-xs">{rec.time || '-'}</td>
+                        <td className="px-3 py-4 text-center">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => deleteAttendance(rec.id)}
+                            className="text-red-500 hover:bg-red-50 hover:text-red-600 w-8 h-8"
+                            title="Hapus Laporan"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
