@@ -215,7 +215,7 @@ const StaffDashboard = () => {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <button 
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate(user?.role === 'admin' || user?.position === 'Pimpinan' ? '/admin' : '/dashboard')}
               className="p-2 bg-teal-50 hover:bg-teal-100 rounded-full text-teal-700 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
