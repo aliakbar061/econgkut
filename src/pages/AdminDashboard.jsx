@@ -274,9 +274,17 @@ const AdminDashboard = () => {
       </nav>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-4xl font-bold text-green-900 mb-2 truncate">Admin Dashboard</h1>
-          <p className="text-sm sm:text-lg text-gray-600 truncate">Kelola pemesanan, staff, dan laporan absensi</p>
+        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-4xl font-bold text-green-900 mb-2 truncate">Admin Dashboard</h1>
+            <p className="text-sm sm:text-lg text-gray-600 truncate">Kelola pemesanan, staff, dan laporan absensi</p>
+          </div>
+          {(user?.role === 'admin' || user?.division === 'Keuangan' || user?.position === 'Pimpinan') && (
+            <Button onClick={() => navigate('/finance')} className="bg-emerald-600 hover:bg-emerald-700 text-white w-full sm:w-auto shadow-md shrink-0">
+              <DollarSign className="w-5 h-5 mr-2" />
+              Buka Laporan Keuangan
+            </Button>
+          )}
         </div>
 
         {/* Stats Cards */}
