@@ -8,8 +8,8 @@ import { toast } from 'sonner';
 import UserMenu from '@/components/ui/UserMenu';
 import * as XLSX from 'xlsx';
 
-const DIVISIONS = ['Operasional', 'Keuangan', 'IT', 'SDM', 'Pemasaran', 'Logistik', 'Umum'];
-const POSITIONS = ['Staff', 'Kepala Divisi'];
+const DIVISIONS = ['SDM & IT', 'Keuangan', 'Operasional & Pengolahan'];
+const POSITIONS = ['Pimpinan', 'Kepala', 'Staff', 'Anggota'];
 const ROLES = ['user', 'staff', 'admin'];
 
 const MONTH_NAMES = [
@@ -45,18 +45,18 @@ const AdminDashboard = () => {
     if (!user) { navigate('/'); return; }
     
     // RBAC check
-    const isAuthorized = user.role === 'admin' || ['SDM', 'IT', 'Operasional', 'Pengolahan'].includes(user.division);
+    const isAuthorized = user.role === 'admin' || ['SDM & IT', 'Operasional & Pengolahan'].includes(user.division);
     if (!isAuthorized) {
       toast.error('Akses ditolak. Anda tidak memiliki akses ke halaman ini.');
       navigate('/dashboard');
       return;
     }
 
-    if (user.role !== 'admin' && ['SDM', 'IT'].includes(user.division) && activeTab === 'bookings') {
+    if (user.role !== 'admin' && user.division === 'SDM & IT' && activeTab === 'bookings') {
       setActiveTab('attendance');
     }
 
-    if (user.role === 'admin' || ['Operasional', 'Pengolahan'].includes(user.division)) {
+    if (user.role === 'admin' || user.division === 'Operasional & Pengolahan') {
       fetchStats();
       fetchAllBookings();
     }
@@ -237,9 +237,9 @@ const AdminDashboard = () => {
         {/* Tab Navigation */}
         <div className="flex space-x-2 mb-6 border-b border-gray-200">
           {[
-            { id: 'bookings', label: 'Pemesanan', icon: ClipboardList, allowed: user?.role === 'admin' || ['Operasional', 'Pengolahan'].includes(user?.division) },
-            { id: 'staff', label: 'Manajemen Staff', icon: Users, allowed: user?.role === 'admin' || ['SDM', 'IT'].includes(user?.division) },
-            { id: 'attendance', label: 'Laporan Absensi', icon: BarChart3, allowed: user?.role === 'admin' || ['SDM', 'IT'].includes(user?.division) },
+            { id: 'bookings', label: 'Pemesanan', icon: ClipboardList, allowed: user?.role === 'admin' || user?.division === 'Operasional & Pengolahan' },
+            { id: 'staff', label: 'Manajemen Staff', icon: Users, allowed: user?.role === 'admin' || user?.division === 'SDM & IT' },
+            { id: 'attendance', label: 'Laporan Absensi', icon: BarChart3, allowed: user?.role === 'admin' || user?.division === 'SDM & IT' },
           ].filter(t => t.allowed).map(({ id, label, icon: Icon }) => (
             <button
               key={id}
@@ -369,7 +369,7 @@ const AdminDashboard = () => {
                           <Select
                             value={u.role || 'user'}
                             onValueChange={(v) => updateUser(u.id, 'role', v)}
-                            disabled={updatingUserId === u.id || (user?.role !== 'admin' && user?.position !== 'Kepala Divisi')}
+                            disabled={updatingUserId === u.id || (user?.role !== 'admin' && !['Pimpinan', 'Kepala'].includes(user?.position))}
                           >
                             <SelectTrigger className="w-28 h-8 text-xs border-gray-300">
                               <SelectValue />

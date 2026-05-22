@@ -176,7 +176,7 @@ const Dashboard = () => {
           )}
 
           {/* Admin Dashboard — untuk admin & divisi terkait */}
-          {(user?.role === 'admin' || (user?.role === 'staff' && ['SDM', 'IT', 'Operasional', 'Pengolahan'].includes(user?.division))) && (
+          {(user?.role === 'admin' || (user?.role === 'staff' && ['SDM & IT', 'Operasional & Pengolahan'].includes(user?.division))) && (
             <div
               className="p-8 bg-white rounded-2xl shadow-lg border border-purple-100 card-hover cursor-pointer"
               onClick={() => navigate('/admin')}
