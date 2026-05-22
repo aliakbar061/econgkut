@@ -242,30 +242,30 @@ const Dashboard = () => {
                   const badge = attendanceBadge[rec.status] || { color: 'bg-gray-100 text-gray-700', icon: CheckCircle2 };
                   const BadgeIcon = badge.icon;
                   return (
-                    <div key={rec.id} className="p-4 border border-gray-100 rounded-xl hover:border-teal-200 hover:bg-teal-50 transition-all">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold text-gray-800">{rec.date}</span>
-                            <span className="text-gray-400 text-sm">·</span>
-                            <span className="text-sm text-gray-500">{rec.time}</span>
+                    <div key={rec.id} className="p-3 sm:p-4 border border-gray-100 rounded-xl hover:border-teal-200 hover:bg-teal-50 transition-all">
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 sm:gap-2 mb-1 flex-wrap">
+                            <span className="font-semibold text-gray-800 text-xs sm:text-sm">{rec.date}</span>
+                            <span className="text-gray-300 hidden sm:inline">·</span>
+                            <span className="text-xs text-gray-500 font-mono">{rec.time}</span>
                           </div>
                           {rec.location?.address ? (
-                            <p className="text-sm text-gray-500 flex items-center gap-1">
-                              <MapPin className="w-3 h-3 text-teal-500 flex-shrink-0" />
-                              {rec.location.address}
+                            <p className="text-xs sm:text-sm text-gray-500 flex items-start gap-1 leading-snug">
+                              <MapPin className="w-3 h-3 text-teal-500 flex-shrink-0 mt-0.5" />
+                              <span className="line-clamp-2">{rec.location.address}</span>
                             </p>
                           ) : rec.location ? (
                             <p className="text-xs text-gray-400 flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
-                              {rec.location.lat?.toFixed(4)}, {rec.location.lng?.toFixed(4)}
+                              <MapPin className="w-3 h-3 flex-shrink-0" />
+                              <span className="truncate">{rec.location.lat?.toFixed(4)}, {rec.location.lng?.toFixed(4)}</span>
                             </p>
                           ) : (
                             <p className="text-xs text-gray-400">Tanpa lokasi</p>
                           )}
                         </div>
-                        <span className={`ml-3 flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${badge.color}`}>
-                          <BadgeIcon className="w-3 h-3" />
+                        <span className={`flex-shrink-0 flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs font-bold border ${badge.color}`}>
+                          <BadgeIcon className="w-3 h-3 hidden sm:block" />
                           {rec.status}
                         </span>
                       </div>
