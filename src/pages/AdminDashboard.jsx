@@ -297,13 +297,13 @@ const AdminDashboard = () => {
               { label: 'Sampah Terkumpul', value: `${stats.total_waste_collected.toFixed(1)} kg`, icon: Trash2, color: 'emerald' },
             ].filter(s => s.allowed !== false).map(({ label, value, icon: Icon, color }) => (
               <div key={label} className="p-4 sm:p-6 bg-white rounded-2xl shadow-lg border border-green-100">
-                <div className="flex items-center justify-between mb-2 sm:mb-4">
-                  <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-${color}-100 rounded-xl flex items-center justify-center`}>
+                <div className="flex items-center justify-between mb-2 sm:mb-4 gap-2">
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-${color}-100 rounded-xl flex items-center justify-center`}>
                     <Icon className={`w-5 h-5 sm:w-6 sm:h-6 text-${color}-600`} />
                   </div>
-                  <span className={`text-xl sm:text-2xl font-bold text-${color}-600 truncate max-w-[150px] sm:max-w-none text-right`} title={value}>{value}</span>
+                  <span className={`text-xl sm:text-2xl font-bold text-${color}-600 break-words text-right leading-tight`} title={value}>{value}</span>
                 </div>
-                <p className="text-sm sm:text-base text-gray-600 font-medium truncate" title={label}>{label}</p>
+                <p className="text-sm sm:text-base text-gray-600 font-medium" title={label}>{label}</p>
               </div>
             ))}
           </div>

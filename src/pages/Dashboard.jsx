@@ -5,7 +5,8 @@ import UserMenu from '@/components/ui/UserMenu';
 import { Button } from '@/components/ui/button';
 import {
   Truck, Plus, History, Calendar, Package, User,
-  LayoutDashboard, ClipboardCheck, Users, MapPin, CheckCircle2, Clock, AlertCircle
+  LayoutDashboard, ClipboardCheck, Users, MapPin, CheckCircle2, Clock, AlertCircle,
+  Wallet, DollarSign
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -193,7 +194,7 @@ const Dashboard = () => {
           )}
 
           {/* Admin Dashboard — untuk admin & divisi terkait */}
-          {(user?.role === 'admin' || (user?.role === 'staff' && ['SDM', 'IT', 'SDM & IT', 'Operasional', 'Pengolahan', 'Operasional & Pengolahan'].includes(user?.division))) && (
+          {(user?.role === 'admin' || (user?.role === 'staff' && ['SDM', 'IT', 'SDM & IT', 'Operasional', 'Pengolahan', 'Operasional & Pengolahan', 'Keuangan'].includes(user?.division))) && (
             <div
               className="p-8 bg-white rounded-2xl shadow-lg border border-purple-100 card-hover cursor-pointer"
               onClick={() => navigate('/admin')}
@@ -209,6 +210,27 @@ const Dashboard = () => {
               <p className="text-sm sm:text-base text-gray-600 mb-4 line-clamp-2">{getAdminDashboardSubtitle()}</p>
               <div className="flex items-center text-purple-600 font-medium text-sm sm:text-base">
                 Kelola Sistem <LayoutDashboard className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
+            </div>
+          )}
+
+          {/* Finance Dashboard — khusus Keuangan / Admin / Pimpinan */}
+          {(user?.role === 'admin' || user?.division === 'Keuangan' || user?.position === 'Pimpinan') && (
+            <div
+              className="p-8 bg-white rounded-2xl shadow-lg border border-emerald-100 card-hover cursor-pointer"
+              onClick={() => navigate('/finance')}
+              data-testid="finance-dashboard-card"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-emerald-600 rounded-xl flex items-center justify-center">
+                  <Wallet className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                </div>
+                <DollarSign className="w-6 h-6 text-emerald-400 hidden sm:block" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-emerald-900 mb-2 truncate">Laporan Keuangan</h2>
+              <p className="text-sm sm:text-base text-gray-600 mb-4 line-clamp-2">Pantau pendapatan, pengeluaran, dan arus kas</p>
+              <div className="flex items-center text-emerald-600 font-medium text-sm sm:text-base">
+                Buka Laporan <Wallet className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
           )}
