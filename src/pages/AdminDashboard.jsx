@@ -4,6 +4,16 @@ import { AuthContext } from '@/App';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ArrowLeft, Truck, BarChart3, Package, DollarSign, Trash2, User, Users, ClipboardList, Download, Search, LayoutDashboard } from 'lucide-react';
 import { toast } from 'sonner';
 import UserMenu from '@/components/ui/UserMenu';
@@ -37,7 +47,17 @@ const AdminDashboard = () => {
   const [updatingUserId, setUpdatingUserId] = useState(null);
   const [searchStaff, setSearchStaff] = useState('');
 
-  // Attendance report state
+  // Global Alert Dialog state
+  const [deleteDialog, setDeleteDialog] = useState({ 
+    isOpen: false, 
+    title: '', 
+    desc: '', 
+    action: null 
+  });
+
+  const confirmAction = (title, desc, action) => {
+    setDeleteDialog({ isOpen: true, title, desc, action });
+  };
   const [reportMonth, setReportMonth] = useState(new Date().getMonth() + 1);
   const [reportYear, setReportYear] = useState(new Date().getFullYear());
   const [attendanceRecords, setAttendanceRecords] = useState([]);
@@ -98,26 +118,36 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDeleteBooking = async (id) => {
-    if (!window.confirm("Yakin ingin menghapus pemesanan ini? Tindakan ini tidak dapat dibatalkan.")) return;
-    try {
-      await axiosInstance.delete(`/admin/bookings/${id}`);
-      toast.success('Pemesanan berhasil dihapus');
-      fetchAllBookings(); fetchStats();
-    } catch (e) {
-      toast.error(e.response?.data?.detail || 'Gagal menghapus pemesanan');
-    }
+  const handleDeleteBooking = (id) => {
+    confirmAction(
+      "Hapus Pemesanan",
+      "Yakin ingin menghapus pemesanan ini? Tindakan ini tidak dapat dibatalkan.",
+      async () => {
+        try {
+          await axiosInstance.delete(`/admin/bookings/${id}`);
+          toast.success('Pemesanan berhasil dihapus');
+          fetchAllBookings(); fetchStats();
+        } catch (e) {
+          toast.error(e.response?.data?.detail || 'Gagal menghapus pemesanan');
+        }
+      }
+    );
   };
 
-  const handleDeleteAllBookings = async () => {
-    if (!window.confirm("⚠️ PERINGATAN! Anda akan menghapus SEMUA data pemesanan. Yakin ingin melanjutkan?")) return;
-    try {
-      const res = await axiosInstance.delete('/admin/bookings');
-      toast.success(res.data?.message || 'Semua pemesanan berhasil dihapus');
-      fetchAllBookings(); fetchStats();
-    } catch (e) {
-      toast.error(e.response?.data?.detail || 'Gagal menghapus semua pemesanan');
-    }
+  const handleDeleteAllBookings = () => {
+    confirmAction(
+      "Hapus Semua Pemesanan",
+      "⚠️ PERINGATAN! Anda akan menghapus SEMUA data pemesanan. Yakin ingin melanjutkan?",
+      async () => {
+        try {
+          const res = await axiosInstance.delete('/admin/bookings');
+          toast.success(res.data?.message || 'Semua pemesanan berhasil dihapus');
+          fetchAllBookings(); fetchStats();
+        } catch (e) {
+          toast.error(e.response?.data?.detail || 'Gagal menghapus semua pemesanan');
+        }
+      }
+    );
   };
 
   // ── Users / Staff ──────────────────────────────────────────────────────────
@@ -142,16 +172,20 @@ const AdminDashboard = () => {
     } finally { setUpdatingUserId(null); }
   };
 
-  const deleteUser = async (userId) => {
-    if (!window.confirm('Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak dapat dibatalkan.')) return;
-    
-    try {
-      await axiosInstance.delete(`/admin/users/${userId}`);
-      toast.success('Pengguna berhasil dihapus');
-      setUsers(prev => prev.filter(u => u.id !== userId));
-    } catch (e) {
-      toast.error(e.response?.data?.detail || 'Gagal menghapus pengguna');
-    }
+  const deleteUser = (userId) => {
+    confirmAction(
+      "Hapus Pengguna",
+      "Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak dapat dibatalkan.",
+      async () => {
+        try {
+          await axiosInstance.delete(`/admin/users/${userId}`);
+          toast.success('Pengguna berhasil dihapus');
+          setUsers(prev => prev.filter(u => u.id !== userId));
+        } catch (e) {
+          toast.error(e.response?.data?.detail || 'Gagal menghapus pengguna');
+        }
+      }
+    );
   };
 
   // ── Attendance Report ──────────────────────────────────────────────────────
@@ -175,26 +209,36 @@ const AdminDashboard = () => {
     }
   };
 
-  const deleteAttendance = async (attId) => {
-    if (!window.confirm('Hapus laporan absensi ini?')) return;
-    try {
-      await axiosInstance.delete(`/attendance/${attId}`);
-      setAttendanceRecords(prev => prev.filter(r => r.id !== attId));
-      toast.success('Laporan berhasil dihapus');
-    } catch (e) {
-      toast.error('Gagal menghapus laporan');
-    }
+  const deleteAttendance = (attId) => {
+    confirmAction(
+      "Hapus Laporan Absensi",
+      "Hapus laporan absensi ini? Tindakan ini tidak dapat dibatalkan.",
+      async () => {
+        try {
+          await axiosInstance.delete(`/attendance/${attId}`);
+          setAttendanceRecords(prev => prev.filter(r => r.id !== attId));
+          toast.success('Laporan berhasil dihapus');
+        } catch (e) {
+          toast.error('Gagal menghapus laporan');
+        }
+      }
+    );
   };
 
-  const deleteAllAttendance = async () => {
-    if (!window.confirm('PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA data absensi? Tindakan ini tidak dapat dibatalkan.')) return;
-    try {
-      await axiosInstance.delete(`/attendance/report/all`);
-      setAttendanceRecords([]);
-      toast.success('Semua laporan absensi berhasil dihapus');
-    } catch (e) {
-      toast.error('Gagal menghapus semua laporan');
-    }
+  const deleteAllAttendance = () => {
+    confirmAction(
+      "Hapus Semua Data Absensi",
+      "PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA data absensi? Tindakan ini tidak dapat dibatalkan.",
+      async () => {
+        try {
+          await axiosInstance.delete(`/attendance/report/all`);
+          setAttendanceRecords([]);
+          toast.success('Semua laporan absensi berhasil dihapus');
+        } catch (e) {
+          toast.error('Gagal menghapus semua laporan');
+        }
+      }
+    );
   };
 
   const exportToExcel = () => {
@@ -673,6 +717,34 @@ const AdminDashboard = () => {
           </div>
         )}
       </div>
+
+      {/* ── GLOBAL MODALS / DIALOGS ── */}
+      <AlertDialog open={deleteDialog.isOpen} onOpenChange={(open) => !open && setDeleteDialog(prev => ({ ...prev, isOpen: false }))}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-red-600 flex items-center gap-2">
+              <Trash2 className="w-5 h-5" />
+              {deleteDialog.title}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600 text-base">
+              {deleteDialog.desc}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => {
+                if (deleteDialog.action) deleteDialog.action();
+                setDeleteDialog(prev => ({ ...prev, isOpen: false }));
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   );
 };
