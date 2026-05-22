@@ -11,7 +11,14 @@ import {
 const Dashboard = () => {
   const { user, logout, axiosInstance } = useContext(AuthContext);
   const navigate = useNavigate();
-  const isStaff = user?.role === 'staff';
+  const isStaff = user?.role === 'staff' || user?.role === 'admin';
+
+  const getAdminDashboardSubtitle = () => {
+    if (user?.role === 'admin') return 'Kelola pemesanan, staff, dan laporan absensi';
+    if (['SDM', 'IT', 'SDM & IT'].includes(user?.division)) return 'Kelola staff dan laporan absensi';
+    if (['Operasional', 'Pengolahan', 'Operasional & Pengolahan'].includes(user?.division)) return 'Kelola pemesanan dan armada';
+    return 'Kelola pemesanan, staff, dan laporan absensi';
+  };
 
   // Booking state (hanya untuk non-staff)
   const [bookings, setBookings] = useState([]);
@@ -189,7 +196,7 @@ const Dashboard = () => {
                 <User className="w-6 h-6 text-purple-400" />
               </div>
               <h2 className="text-2xl font-bold text-purple-900 mb-2">Admin Dashboard</h2>
-              <p className="text-gray-600 mb-4">Kelola pemesanan, staff, dan laporan absensi</p>
+              <p className="text-gray-600 mb-4">{getAdminDashboardSubtitle()}</p>
               <div className="flex items-center text-purple-600 font-medium">
                 Kelola Sistem <LayoutDashboard className="ml-2 w-5 h-5" />
               </div>
