@@ -255,7 +255,6 @@ const FinanceDashboard = () => {
               <span className="hidden sm:inline">Ekspor Excel</span>
             </Button>
           </div>
-          </div>
         </div>
 
         {/* Summary Cards */}
