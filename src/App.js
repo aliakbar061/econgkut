@@ -169,7 +169,7 @@ function App() {
             <Route path="/bookings" element={user ? <MyBookings /> : <Navigate to="/" />} />
             <Route path="/bookings/:id" element={user ? <BookingDetail /> : <Navigate to="/" />} />
             <Route path="/payment-success" element={user ? <PaymentSuccess /> : <Navigate to="/" />} />
-            <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/dashboard" />} />
+            <Route path="/admin" element={user?.role === 'admin' || (user?.role === 'staff' && ['SDM', 'IT', 'SDM & IT', 'Operasional', 'Pengolahan', 'Operasional & Pengolahan'].includes(user?.division)) ? <AdminDashboard /> : <Navigate to="/dashboard" />} />
             <Route path="/staff" element={user?.role === 'staff' || user?.role === 'admin' ? <StaffDashboard /> : <Navigate to="/dashboard" />} />
           </Routes>
         </BrowserRouter>
