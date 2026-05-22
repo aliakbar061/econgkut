@@ -235,7 +235,7 @@ const AdminDashboard = () => {
         )}
 
         {/* Tab Navigation */}
-        <div className="flex space-x-2 mb-6 border-b border-gray-200">
+        <div className="flex overflow-x-auto pb-1 mb-6 border-b border-gray-200 hide-scrollbar space-x-2">
           {[
             { id: 'bookings', label: 'Pemesanan', icon: ClipboardList, allowed: user?.role === 'admin' || ['Operasional', 'Pengolahan', 'Operasional & Pengolahan'].includes(user?.division) },
             { id: 'staff', label: 'Manajemen Staff', icon: Users, allowed: user?.role === 'admin' || ['SDM', 'IT', 'SDM & IT'].includes(user?.division) },
@@ -337,8 +337,8 @@ const AdminDashboard = () => {
                 <p className="text-gray-500">Belum ada pengguna terdaftar</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+              <div className="overflow-x-auto rounded-xl border border-gray-200 pb-2">
+                <table className="w-full text-sm min-w-[800px]">
                   <thead>
                     <tr className="bg-green-50 text-green-800 text-left">
                       <th className="px-4 py-3 rounded-tl-lg font-semibold">Pengguna</th>
@@ -360,7 +360,18 @@ const AdminDashboard = () => {
                               </div>
                             )}
                             <div>
-                              <p className="font-semibold text-gray-800">{u.name}</p>
+                              <input 
+                                type="text"
+                                defaultValue={u.name}
+                                onBlur={(e) => {
+                                  if (e.target.value !== u.name && e.target.value.trim() !== '') {
+                                    updateUser(u.id, 'name', e.target.value);
+                                  }
+                                }}
+                                disabled={updatingUserId === u.id || (user?.role !== 'admin' && u.role === 'admin')}
+                                className="font-semibold text-gray-800 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:outline-none focus:ring-0 px-0 max-w-[150px] transition-colors"
+                                title="Klik untuk mengedit nama"
+                              />
                               <p className="text-xs text-gray-500">{u.email}</p>
                             </div>
                           </div>
@@ -460,8 +471,8 @@ const AdminDashboard = () => {
                 <p className="text-gray-500">Tidak ada data absensi untuk periode ini</p>
               </div>
             ) : (
-              <div className="overflow-x-auto rounded-xl border border-gray-200">
-                <table className="w-full text-sm">
+              <div className="overflow-x-auto rounded-xl border border-gray-200 pb-2">
+                <table className="w-full text-sm min-w-[600px]">
                   <thead>
                     <tr className="bg-green-700 text-white text-center">
                       <th className="px-3 py-3 font-semibold text-left">Tgl</th>

@@ -161,8 +161,8 @@ const Dashboard = () => {
             </>
           )}
 
-          {/* Portal Absensi — untuk staff & admin */}
-          {(isStaff || user?.role === 'admin') && (
+          {/* Portal Absensi — hanya untuk staff */}
+          {user?.role === 'staff' && (
             <div
               className="p-8 bg-white rounded-2xl shadow-lg border border-teal-100 card-hover cursor-pointer"
               onClick={() => navigate('/staff')}
