@@ -98,6 +98,28 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteBooking = async (id) => {
+    if (!window.confirm("Yakin ingin menghapus pemesanan ini? Tindakan ini tidak dapat dibatalkan.")) return;
+    try {
+      await axiosInstance.delete(`/admin/bookings/${id}`);
+      toast.success('Pemesanan berhasil dihapus');
+      fetchAllBookings(); fetchStats();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Gagal menghapus pemesanan');
+    }
+  };
+
+  const handleDeleteAllBookings = async () => {
+    if (!window.confirm("⚠️ PERINGATAN! Anda akan menghapus SEMUA data pemesanan. Yakin ingin melanjutkan?")) return;
+    try {
+      const res = await axiosInstance.delete('/admin/bookings');
+      toast.success(res.data?.message || 'Semua pemesanan berhasil dihapus');
+      fetchAllBookings(); fetchStats();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Gagal menghapus semua pemesanan');
+    }
+  };
+
   // ── Users / Staff ──────────────────────────────────────────────────────────
   const fetchAllUsers = async () => {
     setLoadingUsers(true);
@@ -350,9 +372,15 @@ const AdminDashboard = () => {
           <div className="bg-white rounded-2xl shadow-lg border border-green-100 p-8">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-green-900">Semua Pemesanan</h2>
-              <Button variant="outline" onClick={() => { fetchAllBookings(); fetchStats(); }} className="border-green-600 text-green-700 hover:bg-green-50">
-                Refresh
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" onClick={handleDeleteAllBookings} className="border-red-600 text-red-600 hover:bg-red-50" disabled={bookings.length === 0}>
+                  <Trash2 className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Hapus Semua</span>
+                </Button>
+                <Button variant="outline" onClick={() => { fetchAllBookings(); fetchStats(); }} className="border-green-600 text-green-700 hover:bg-green-50">
+                  Refresh
+                </Button>
+              </div>
             </div>
             {loadingBookings ? (
               <div className="text-center py-12 text-gray-500">Memuat...</div>
@@ -366,7 +394,14 @@ const AdminDashboard = () => {
                 {bookings.map((booking) => {
                   const pay = getPaymentStatus(booking);
                   return (
-                    <div key={booking.id} className="p-6 border border-gray-200 rounded-xl hover:border-green-300 hover:shadow-md transition-all">
+                    <div key={booking.id} className="relative p-6 border border-gray-200 rounded-xl hover:border-green-300 hover:shadow-md transition-all">
+                      <button 
+                        onClick={() => handleDeleteBooking(booking.id)}
+                        className="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                        title="Hapus Pemesanan"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-start sm:items-center">
                         <div>
                           <h3 className="font-semibold text-lg text-green-900 truncate" title={booking.waste_type_name}>{booking.waste_type_name}</h3>
