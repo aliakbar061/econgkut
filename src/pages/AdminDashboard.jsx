@@ -369,7 +369,7 @@ const AdminDashboard = () => {
                           <Select
                             value={u.role || 'user'}
                             onValueChange={(v) => updateUser(u.id, 'role', v)}
-                            disabled={updatingUserId === u.id || (user?.role !== 'admin' && !['Pimpinan', 'Kepala'].includes(user?.position))}
+                            disabled={updatingUserId === u.id || (user?.role !== 'admin' && (!['Pimpinan', 'Kepala'].includes(user?.position) || u.role === 'admin'))}
                           >
                             <SelectTrigger className="w-28 h-8 text-xs border-gray-300">
                               <SelectValue />
@@ -381,9 +381,9 @@ const AdminDashboard = () => {
                         </td>
                         <td className="px-4 py-4">
                           <Select
-                            value={u.division || ''}
+                            value={u.division || 'Umum'}
                             onValueChange={(v) => updateUser(u.id, 'division', v)}
-                            disabled={updatingUserId === u.id}
+                            disabled={updatingUserId === u.id || (user?.role !== 'admin' && u.role === 'admin')}
                           >
                             <SelectTrigger className="w-36 h-8 text-xs border-gray-300">
                               <SelectValue placeholder="Pilih Divisi" />
@@ -395,9 +395,9 @@ const AdminDashboard = () => {
                         </td>
                         <td className="px-4 py-4">
                           <Select
-                            value={u.position || ''}
+                            value={u.position || 'Anggota'}
                             onValueChange={(v) => updateUser(u.id, 'position', v)}
-                            disabled={updatingUserId === u.id}
+                            disabled={updatingUserId === u.id || (user?.role !== 'admin' && u.role === 'admin')}
                           >
                             <SelectTrigger className="w-40 h-8 text-xs border-gray-300">
                               <SelectValue placeholder="Pilih Posisi" />
