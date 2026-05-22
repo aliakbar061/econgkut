@@ -2,8 +2,9 @@ import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/App';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Truck, BarChart3, Package, DollarSign, Trash2, User, Users, ClipboardList, Download } from 'lucide-react';
+import { ArrowLeft, Truck, BarChart3, Package, DollarSign, Trash2, User, Users, ClipboardList, Download, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import UserMenu from '@/components/ui/UserMenu';
 import * as XLSX from 'xlsx';
@@ -34,6 +35,7 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [updatingUserId, setUpdatingUserId] = useState(null);
+  const [searchStaff, setSearchStaff] = useState('');
 
   // Attendance report state
   const [reportMonth, setReportMonth] = useState(new Date().getMonth() + 1);
@@ -193,6 +195,30 @@ const AdminDashboard = () => {
   };
 
   // ── Helpers ────────────────────────────────────────────────────────────────
+  const getSortScore = (u) => {
+    if (u.role === 'admin') return 1000;
+    if (u.role === 'user' || !u.role) return 0;
+    
+    let score = 0;
+    if (u.position === 'Pimpinan') score = 950;
+    else if (u.position === 'Kepala' || u.position === 'Kepala Divisi') score = 900;
+    else if (u.position === 'Staff') score = 800;
+    else if (u.position === 'Anggota') score = 700;
+    else score = 600;
+
+    const div = (u.division || '').toLowerCase();
+    if (div.includes('sdm') || div.includes('it')) score += 30;
+    else if (div.includes('keuangan')) score += 20;
+    else if (div.includes('operasional') || div.includes('pengolahan')) score += 10;
+    
+    return score;
+  };
+
+  const filteredAndSortedUsers = users.filter(u => {
+    const term = searchStaff.toLowerCase();
+    return (u.name?.toLowerCase().includes(term) || u.email?.toLowerCase().includes(term));
+  }).sort((a, b) => getSortScore(b) - getSortScore(a));
+
   const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
   const getPaymentStatus = (b) => {
     if (b.status === 'completed') return { text: 'Dibayar', color: 'text-green-600' };
@@ -332,14 +358,25 @@ const AdminDashboard = () => {
         {/* ── TAB: STAFF MANAGEMENT ── */}
         {activeTab === 'staff' && (
           <div className="bg-white rounded-2xl shadow-lg border border-green-100 p-8">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <div>
                 <h2 className="text-2xl font-bold text-green-900">Manajemen Staff</h2>
                 <p className="text-sm text-gray-500 mt-1">Atur role, divisi, dan posisi setiap pengguna</p>
               </div>
-              <Button variant="outline" onClick={fetchAllUsers} className="border-green-600 text-green-700 hover:bg-green-50">
-                Refresh
-              </Button>
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                <div className="relative w-full sm:w-64">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input 
+                    placeholder="Cari nama atau email..." 
+                    value={searchStaff}
+                    onChange={(e) => setSearchStaff(e.target.value)}
+                    className="pl-9 h-9 text-sm border-gray-300 focus:border-green-500 w-full"
+                  />
+                </div>
+                <Button variant="outline" onClick={fetchAllUsers} className="border-green-600 text-green-700 hover:bg-green-50 h-9 w-full sm:w-auto">
+                  Refresh
+                </Button>
+              </div>
             </div>
             {loadingUsers ? (
               <div className="text-center py-12 text-gray-500">Memuat data pengguna...</div>
@@ -361,7 +398,7 @@ const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map((u) => (
+                    {filteredAndSortedUsers.map((u) => (
                       <tr key={u.id} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${updatingUserId === u.id ? 'opacity-60' : ''}`}>
                         <td className="px-4 py-4">
                           <div className="flex items-center space-x-3">
